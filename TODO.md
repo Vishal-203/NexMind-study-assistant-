@@ -1,6 +1,11 @@
- # TODO
+# TODO
 
-- [x] Add new futuristic geometric neon SVG logo (cyan→purple gradient) with glow + glass feel
-- [x] Add CSS styles for neon/glass logo blending with dark sci-fi theme
-- [ ] Replace all HTML references to `assets/study-logo-theme.png` with `assets/ai-geom-neon-logo.svg` (and `../assets/...` in admin pages)
-- [ ] Smoke test key pages (index, dashboard, planner, notebook, profile, admin dashboard)
+- [x] Update `frontend/notebook.html` Visual Mapping card:
+  - [x] Add dedicated subject/topic bar inputs for the sketch card
+  - [x] Update `save-drawing` handler to read those inputs and save sketch to `/notes`
+  - [x] Update `editNote` to populate those Visual Mapping inputs when note has `drawing`
+- [ ] Manual test in browser:
+  - [ ] Create a visual map with subject/topic, save, verify appears in My Knowledge
+  - [ ] Edit the saved sketch and verify canvas + inputs restore
+
+

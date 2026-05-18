@@ -43,6 +43,12 @@
       <div class="card">
         <h3>Visual Mapping</h3>
         <p class="section-intro">Sketch complex relationships and formulas.</p>
+
+        <div style="margin-top: 0.75rem; display:flex; gap:0.5rem; flex-wrap:wrap; align-items:center; padding:0.6rem 0.75rem; border:1px solid rgba(255,255,255,0.08); border-radius:12px; background: rgba(0,0,0,0.22);">
+          <input id="map-subject" class="input-field" placeholder="Subject" style="flex:1; min-width: 180px;" />
+          <input id="map-topic" class="input-field" placeholder="Topic" style="flex:1; min-width: 180px;" />
+        </div>
+
         <canvas id="canvas" width="760" height="320" style="border:1px solid rgba(255, 255, 255, 0.18); width:100%; cursor:crosshair; background:rgba(0,0,0,0.3); border-radius:12px;"></canvas>
         <div style="margin-top: 0.75rem; display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap;">
           <label style="display:flex; align-items:center; gap:0.5rem; color: var(--text-muted); font-size:0.8rem;">Pen:
@@ -135,34 +141,46 @@ let painting = false;
 let notePage = 1;
 const noteLimit = 10;
 
-function start(){
-  painting = true;
-  ctx.beginPath();
+function getPos(e){
+  const rect = e.target.getBoundingClientRect();
+  return { x: e.clientX - rect.left, y: e.clientY - rect.top };
 }
-function stop(){
+
+function start(e){
+  painting = true;
+  try { e.target.setPointerCapture(e.pointerId); } catch(_){ }
+  ctx.beginPath();
+  const {x,y} = getPos(e);
+  ctx.moveTo(x,y);
+}
+function stop(e){
   painting = false;
   ctx.beginPath();
+  try { e.target.releasePointerCapture(e.pointerId); } catch(_){ }
 }
 
 function draw(e){
   if(!painting) return;
-  const rect = e.target.getBoundingClientRect();
+  const {x,y} = getPos(e);
   const colorEl = document.getElementById('pen-color');
   const color = colorEl ? colorEl.value : '#F4F4F5';
 
   ctx.lineWidth = 2;
   ctx.lineCap = 'round';
   ctx.strokeStyle = color;
-  ctx.lineTo(e.clientX - rect.left, e.clientY - rect.top);
+  ctx.lineTo(x, y);
   ctx.stroke();
   ctx.beginPath();
-  ctx.moveTo(e.clientX - rect.left, e.clientY - rect.top);
+  ctx.moveTo(x,y);
 }
 
+const canvasEl = document.getElementById('canvas');
+canvasEl.style.touchAction = 'none';
+canvasEl.addEventListener('pointerdown', start);
+canvasEl.addEventListener('pointerup', stop);
+canvasEl.addEventListener('pointercancel', stop);
+canvasEl.addEventListener('pointermove', draw);
 
-document.getElementById('canvas').addEventListener('mousedown', start);
-document.getElementById('canvas').addEventListener('mouseup', stop);
-document.getElementById('canvas').addEventListener('mousemove', draw);
 document.getElementById('clear-canvas').onclick = () => ctx.clearRect(0,0,760,320);
 
 async function loadNotes(filter=''){
@@ -365,7 +383,6 @@ function prefillNewNoteFromQueryParams() {
 prefillNewNoteFromQueryParams();
 
 document.getElementById('save-note').onclick = async ()=>{
-
   const sub = document.getElementById('note-subject').value.trim();
   const top = document.getElementById('note-topic').value.trim();
   const content = document.getElementById('note-content').value;
@@ -383,13 +400,12 @@ document.getElementById('save-note').onclick = async ()=>{
 };
 
 document.getElementById('save-drawing').onclick = async()=>{
-  const sub = document.getElementById('note-subject').value.trim();
-  const top = document.getElementById('note-topic').value.trim();
+  const sub = document.getElementById('map-subject').value.trim();
+  const top = document.getElementById('map-topic').value.trim();
   if(!sub || !top) return;
 
   const drawing = document.getElementById('canvas').toDataURL();
 
-  // Prevent accidental empty saves
   if(!drawing || drawing.length < 1000) {
     document.getElementById('drawing-msg').textContent = 'Sketch canvas is empty. Draw something before saving.';
     return;
@@ -403,8 +419,6 @@ document.getElementById('save-drawing').onclick = async()=>{
   }
 };
 
-
-
 window.editNote = async(id)=>{
   const r = await apiFetch(`/notes/${id}`);
   if(!r.success || r.data.is_owner === false) return;
@@ -412,6 +426,10 @@ window.editNote = async(id)=>{
   document.getElementById('note-subject').value = note.subject;
   document.getElementById('note-topic').value = note.topic;
   document.getElementById('note-content').value = note.content || '';
+
+  document.getElementById('map-subject').value = note.subject || '';
+  document.getElementById('map-topic').value = note.topic || '';
+
   if(note.drawing){
     const img = new Image();
     img.onload = ()=>ctx.drawImage(img,0,0,760,320);
@@ -437,12 +455,28 @@ window.exportPDF = async(id) => {
   const r = await apiFetch(`/notes/${id}`);
   if(!r.success) return;
   const n = r.data;
+
   const el = document.createElement('div');
   el.style.padding = '20px';
   el.style.color = '#000';
-  el.innerHTML = `<h2>${n.subject}</h2><p><strong>Topic:</strong> ${n.topic}</p><hr><p>${(n.content || '').replace(/\n/g, '<br>')}</p>`;
+
+  // Content may be stored in different fields depending on how the note was created/imported.
+  const contentCandidates = [n.content, n.text, n.note_content, n.body, n.note_body];
+  const rawContent = (contentCandidates.find(v => (v ?? '').toString().trim().length > 0) ?? '').toString().trim();
+  const hasRealText = rawContent && rawContent !== '[Visual Map]';
+  const contentHtml = hasRealText ? `<p>${rawContent.replace(/\n/g, '<br>')}</p>` : '';
+
+  const drawingHtml = n.drawing
+    ? `<div style="margin-top:14px;">
+         <p><strong>Visual:</strong></p>
+         <img src="${n.drawing}" style="max-width:100%; border:1px solid rgba(0,0,0,0.15); border-radius:10px;" />
+       </div>`
+    : '';
+
+  el.innerHTML = `<h2>${n.subject}</h2><p><strong>Topic:</strong> ${n.topic}</p><hr>${contentHtml}${drawingHtml}`;
   html2pdf().set({ margin: 10, filename: `${n.subject}.pdf` }).from(el).save();
 };
 </script>
 </body>
 </html>
+

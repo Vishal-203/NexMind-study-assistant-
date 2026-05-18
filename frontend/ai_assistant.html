@@ -54,8 +54,9 @@
     <div class="card highlight-card">
       <h3>Query Engine</h3>
       <p class="section-intro">Ask questions about your study material. Context will be automatically synthesized.</p>
-      <textarea id="question" class="input-field" rows="3" placeholder="Analyze knowledge nodes..."></textarea>
+<textarea id="question" class="input-field" rows="3" placeholder="Analyze knowledge nodes..."></textarea>
       <button class="btn" id="ask-btn">Execute Query</button>
+
       <div id="answer" class="result-panel" style="display: none;">
         <div class="result-panel-actions" aria-hidden="true">
           <button class="result-action-btn" onclick="copyResult('answer')">Copy</button>
@@ -320,7 +321,18 @@ async function loadNoteOptions() {
   status.textContent = `${items.length} node(s) connected.`;
 }
 
+const questionEl = document.getElementById('question');
+
+questionEl.addEventListener('keydown', (e) => {
+  // Execute query on Enter (Shift+Enter keeps newline behavior)
+  if (e.key === 'Enter' && !e.shiftKey) {
+    e.preventDefault();
+    document.getElementById('ask-btn')?.click();
+  }
+});
+
 document.getElementById('ask-btn').onclick = async function() {
+
   const q = document.getElementById('question').value.trim();
   if(!q) return;
   const fileId = document.getElementById('file-select').value || null;

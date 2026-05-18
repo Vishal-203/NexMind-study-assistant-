@@ -60,8 +60,50 @@ def _read_docx(filepath):
 
 def _read_image(filepath):
     image = Image.open(filepath)
-    text = pytesseract.image_to_string(image)
-    return text or ''
+
+    # Primary OCR: Tesseract (fast, but requires system tesseract installed)
+    try:
+        text = pytesseract.image_to_string(image)
+        if text and text.strip():
+            return text
+    except Exception:
+        pass
+
+    # Fallback OCR: PaddleOCR (works without system tesseract)
+    # Try multiple languages to improve success rates across different image text.
+    try:
+        from paddleocr import PaddleOCR
+
+        def _extract_with_lang(lang_value):
+            if lang_value is None:
+                ocr = PaddleOCR(use_angle_cls=True)
+            else:
+                ocr = PaddleOCR(use_angle_cls=True, lang=lang_value)
+
+            result = ocr.ocr(filepath, cls=True)
+
+            chunks = []
+            # result: [ [ [box, (text, conf)], ... ] ]
+            for line in result or []:
+                for item in line or []:
+                    if isinstance(item, (list, tuple)) and len(item) >= 2:
+                        txt = None
+                        if isinstance(item[1], (list, tuple)) and item[1]:
+                            txt = item[1][0]
+                        if txt and str(txt).strip():
+                            chunks.append(str(txt).strip())
+
+            return '\n'.join(chunks) if chunks else ''
+
+        for lang in ('en', 'ch'):
+            extracted = _extract_with_lang(lang)
+            if extracted and extracted.strip():
+                return extracted
+
+        return _extract_with_lang(None)
+
+    except Exception:
+        return ''
 
 
 def _read_xlsx(filepath):
@@ -114,7 +156,6 @@ def _read_xls(filepath):
 
 
 def _normalize_text(text):
-
     if text is None:
         return ''
     normalized = ' '.join(text.split())
@@ -179,19 +220,25 @@ def extract_text_from_file(app, file_id):
                 text = _ocr_pdf_images(filepath)
         elif file_type in ('docx', 'doc'):
             text = _read_docx(filepath)
-        elif file_type in ('jpg', 'jpeg', 'png'):
+        # Treat any unknown image extension as an image and OCR it.
+        # Even if the extension is non-standard, PIL will raise if it's not an image.
+        elif file_type in ('jpg', 'jpeg', 'png', 'gif', 'bmp', 'tiff', 'webp'):
             text = _read_image(filepath)
         elif file_type == 'xlsx':
             text = _read_xlsx(filepath)
         elif file_type == 'xls':
             text = _read_xls(filepath)
         else:
-            # Last-resort: try treating as plain text
-            # (helps if users upload text-like formats without a supported extension)
+            # Last-resort: attempt OCR for any file that PIL recognizes as an image,
+            # otherwise attempt to treat it as plain text.
             try:
-                text = _read_txt(filepath)
+                text = _read_image(filepath)
             except Exception:
-                return {'success': False, 'message': 'Unsupported file type for extraction', 'status': 400}
+                try:
+                    text = _read_txt(filepath)
+                except Exception:
+                    return {'success': False, 'message': 'Unsupported file type for extraction', 'status': 400}
+
     except Exception as e:
         return {'success': False, 'message': f'Error extracting file text: {str(e)}', 'status': 500}
 

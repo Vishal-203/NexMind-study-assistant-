@@ -15,8 +15,11 @@ ALLOWED_EXTENSIONS = {
     'doc', 'docx',
     'ppt', 'pptx',
     'xls', 'xlsx', 'ods',
-    'jpg', 'jpeg', 'png', 'gif', 'bmp', 'tiff', 'webp'
+    # Images (expanded)
+    'jpg', 'jpeg', 'png', 'gif', 'bmp', 'tif', 'tiff', 'webp',
+    'ico', 'heic', 'svg', 'web'
 }
+
 MAX_FILE_SIZE = 20 * 1024 * 1024  # 20MB
 
 # Create uploads folder if it doesn't exist
