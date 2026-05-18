@@ -152,8 +152,17 @@ def answer_question(app):
 
     context_parts = []
 
-    # Always inject numeric dashboard context so the model can answer questions like "how many tasks".
-    context_parts.append(_get_dashboard_numeric_context(app))
+    # Inject numeric dashboard context only when the user asks for app data counts.
+    # This prevents the model from replying with notes/tasks statistics for unrelated questions.
+    question_lower = question.lower()
+    asks_for_notes = 'how many notes' in question_lower or 'notes:' in question_lower or 'notes count' in question_lower
+    asks_for_tasks = 'how many tasks' in question_lower or 'tasks:' in question_lower or 'tasks count' in question_lower
+    asks_for_completed = 'completed tasks' in question_lower or 'completed task' in question_lower
+    asks_for_pending = 'pending tasks' in question_lower or 'pending task' in question_lower
+
+    if asks_for_notes or asks_for_tasks or asks_for_completed or asks_for_pending:
+        context_parts.append(_get_dashboard_numeric_context(app))
+
 
     if direct_context:
         context_parts.append(direct_context)
