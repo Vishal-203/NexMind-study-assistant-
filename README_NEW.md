@@ -1,16 +1,11 @@
 # AI Study Assistant with Digital Notebook (Flask + MongoDB)
 
-This project is a full-stack study assistant platform.
-
+This project is a full-stack study assistant platform. It includes:
 - **Flask backend** with REST APIs
 - **MongoDB** for persistence
 - **Vanilla JS frontend** served as static files
 
----
-
-## Key fixes (registration + login issues)
-
-### 1) Server error 500 on registration
+## Key fix (Server error 500 on registration)
 Registration (`POST /api/auth/register`) previously failed with **500** due to MongoDB index creation throwing:
 
 > `pymongo.errors.OperationFailure: Index already exists with a different name ... IndexOptionsConflict`
@@ -20,23 +15,7 @@ The fix was to make index creation tolerant of existing/previously-created index
 
 After the fix, user registration succeeds with **HTTP 200**.
 
----
-
-### 2) New users can’t log in after registering
-Login was failing for newly registered users because password hashing/checking was inconsistent:
-- Registration stored hashes using Werkzeug (`generate_password_hash`)
-- Login verification used bcrypt (`bcrypt.checkpw`)
-
-The fix updated:
-- `backend/utils/helpers.py` (`check_password`) to support BOTH Werkzeug and bcrypt hashed passwords.
-
-After the fix, newly registered users can successfully log in.
-
----
-
-
 ## Features
-
 - **Authentication** (Register/Login) using JWT tokens
 - **User profile**
 - **Digital Notebook** (notes CRUD, subject/topic filtering)
@@ -44,43 +23,30 @@ After the fix, newly registered users can successfully log in.
 - **AI Assistant** (ask/summarize/quiz endpoints)
 - **File support** (upload/list/download)
 
----
-
 ## Tech Stack
-
 - Backend: **Python 3 + Flask + PyMongo + JWT**
 - Frontend: **HTML/CSS/Vanilla JavaScript**
 - Database: **MongoDB**
 
----
-
 ## Requirements
-
 - Python 3.8+
 - MongoDB (local or Atlas)
 - OpenAI API key (for AI features)
 
----
-
 ## Setup
-
-1) Create/activate virtual environment
-
+### 1) Create/activate virtual environment
 ```powershell
 python -m venv .venv
-.\venv\Scripts\Activate.ps1
+.stream: .venv\Scripts\Activate.ps1
 ```
 
-2) Install backend dependencies
-
+### 2) Install backend dependencies
 ```powershell
 pip install -r backend/requirements.txt
 ```
 
-3) Configure environment variables
-
+### 3) Configure environment variables
 Create a `.env` file in the project root:
-
 ```env
 SECRET_KEY=super-secret
 JWT_SECRET_KEY=super-secret-jwt
@@ -90,26 +56,20 @@ HOST=0.0.0.0
 PORT=5000
 ```
 
-4) Start MongoDB
-
+### 4) Start MongoDB
+Local example:
 ```powershell
 mongod
 ```
 
-5) Start the server
-
+### 5) Start the server
 ```powershell
 python backend/app.py
 ```
-
 Backend runs on:
-
 - `http://localhost:5000`
 
----
-
 ## API Endpoints (high level)
-
 ### Authentication
 - `POST /api/auth/register`
 - `POST /api/auth/login`
@@ -134,22 +94,30 @@ Backend runs on:
 - `DELETE /api/files/<file_id>`
 - `GET /api/files/<file_id>/download`
 
----
+## Project Structure
+```
+backend/
+  app.py
+  controllers/
+  routes/
+  models/
+  utils/
+frontend/
+  *.html
+  app.js
+  styles.css
+```
 
 ## Testing the registration fix
-
+Example request:
 ```bash
 curl -X POST http://127.0.0.1:5000/api/auth/register \
   -H "Content-Type: application/json" \
   -d '{"name":"Test User","email":"test@example.com","password":"Password123!"}'
 ```
-
 Expected:
 - `success: true` and `data.user_id` in response
 
----
-
 ## License
-
 MIT
 

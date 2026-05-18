@@ -5,20 +5,20 @@
 <title>Study Planner | AI Study Assistant</title>
 <link rel='stylesheet' href='styles.css'>
 </head>
-<body>
+<body class="compact-page">
 <div class="app-container">
   <aside class="sidebar">
-    <div class="sidebar-logo">
-      <div class="pulse-node" style="width: 12px; height: 12px; background: var(--primary); border-radius: 50%;"></div>
-      <span>Neural Flow</span>
+    <div class="sidebar-logo" aria-label="AI Study Assistant">
+assets/study-logo-theme.png
+      <span class="sidebar-logo__text">AI-STUDY ASSISTANT</span>
     </div>
-    <nav class="nav-links">
-      <a href="dashboard.html"><span>📊</span> Dashboard</a>
-      <a href="notebook.html"><span>📓</span> Notes</a>
-      <a href="ai_assistant.html"><span>🧠</span> AI Assistant</a>
-      <a href="planner.html" class="active"><span>✅</span> Tasks</a>
-      <a href="profile.html"><span>👤</span> Profile</a>
-      <a href="#" id="logout-sidebar"><span>🚪</span> Logout</a>
+<nav class="nav-links">
+      <a href="dashboard.html">Dashboard</a>
+      <a href="notebook.html">Notes</a>
+      <a href="ai_assistant.html">AI Assistant</a>
+      <a href="planner.html" class="active">Tasks</a>
+      <a href="profile.html">Profile</a>
+      <a href="#" id="logout-sidebar">Logout</a>
     </nav>
   </aside>
 
@@ -26,13 +26,14 @@
     <section class="page-hero">
       <p class="auth-kicker">Operation Management</p>
       <h1>Task Planner</h1>
-      <p class="section-intro">Optimize your study cycles and manage task priorities within the neural network.</p>
+<p class="section-intro">Optimize your study cycles and manage task priorities.</p>
     </section>
 
     <div class="grid-2">
       <div class="card">
         <h3>Initialize Task</h3>
         <p class="section-intro">Create a new task node with specific metrics.</p>
+        <div id="task-form-error" style="display:none; margin-bottom: 1rem; padding: 0.8rem; border-radius: 10px; border: 1px solid rgba(239,68,68,0.35); background: rgba(239,68,68,0.08); color: rgba(255,255,255,0.92);"></div>
         <input id="task-title" class="input-field" placeholder="Task Title">
         <input id="task-deadline" class="input-field" type="date">
         <select id="task-priority" class="input-field">
@@ -43,18 +44,38 @@
         <button class="btn" id="add-task" style="width: 100%;">Commit Task</button>
       </div>
 
+
       <div class="card">
         <h3>Active Operations</h3>
         <p class="section-intro">Review and manage current task states.</p>
         <ul id="task-list" style="list-style: none;"></ul>
-        <div id="task-pagination" style="display:flex; gap:0.5rem; align-items:center; margin-top:1rem; flex-wrap:wrap;"></div>
+        <div id="task-pagination" style="display:flex; gap:0.5rem; align-items:center; margin-top:0.75rem; flex-wrap:wrap;"></div>
       </div>
     </div>
   </main>
 </div>
 
+<button class="ask-ai-btn" onclick="openChatWidget()">Ask AI</button>
+
+<!-- Chat Widget -->
+<div id="chat-widget" class="chat-widget">
+  <div class="chat-widget-header">
+    <div class="chat-widget-title">AI Assistant</div>
+    <div class="chat-widget-controls">
+      <button onclick="minimizeChatWidget()">_</button>
+      <button onclick="closeChatWidget()">×</button>
+    </div>
+  </div>
+  <div id="chat-messages" class="chat-messages"></div>
+  <div class="chat-input-area">
+    <input type="text" id="chat-input" placeholder="Type a message..." />
+    <button id="chat-send-btn" onclick="sendChatMessage()">Send</button>
+  </div>
+</div>
+
 <script src="app.js"></script>
 <script src="neural-bg.js"></script>
+<script src="chat-widget.js"></script>
 <script>
 requireAuth();
 initDarkMode();
@@ -82,8 +103,8 @@ async function loadTasks(){
     tasks.forEach(task=>{
       const li=document.createElement('li');
       li.className='card';
-      li.style.padding='1rem';
-      li.style.marginBottom='0.75rem';
+      li.style.padding='0.8rem 0.9rem';
+      li.style.marginBottom='0.5rem';
       li.style.borderLeft='4px solid var(--primary)';
       const statusClass = task.status === 'completed' ? 'badge-success' : 'badge-warning';
       const priorityClass = task.priority === 'high' ? 'badge-danger' : task.priority === 'medium' ? 'badge-warning' : 'badge-success';
@@ -98,7 +119,7 @@ async function loadTasks(){
             <span class="badge ${priorityClass}">${task.priority}</span>
           </div>
         </div>
-        <div style="display:flex; gap:0.5rem; margin-top:1rem;">
+        <div style="display:flex; gap:0.5rem; margin-top:0.75rem;">
           <button class="btn btn-secondary" style="padding: 0.3rem 0.8rem; font-size: 0.7rem;" onclick="markDone('${task.id}', '${task.status === 'completed' ? 'pending' : 'completed'}')">${task.status === 'completed' ? 'Revert' : 'Complete'}</button>
           <button class="btn btn-muted" style="padding: 0.3rem 0.8rem; font-size: 0.7rem;" onclick="removeTask('${task.id}')">Purge</button>
         </div>
@@ -123,19 +144,63 @@ window.changeTaskPage = (delta) => { taskPage = Math.max(1, taskPage + delta); l
 window.markDone = async(id, newStatus)=>{ if((await apiFetch(`/tasks/${id}`, 'PUT', {status:newStatus})).success) loadTasks(); };
 window.removeTask = async(id)=>{ if(confirm('Purge task?')) { if((await apiFetch(`/tasks/${id}`, 'DELETE')).success) loadTasks(); } };
 
-document.getElementById('add-task').onclick = async()=>{
-  const title = document.getElementById('task-title').value.trim();
-  const deadline = document.getElementById('task-deadline').value;
-  const priority = document.getElementById('task-priority').value;
-  if(!title||!deadline) return;
-  if((await apiFetch('/tasks','POST',{title,deadline,priority})).success) {
-    document.getElementById('task-title').value='';
-    document.getElementById('task-deadline').value='';
+document.getElementById('add-task') && (document.getElementById('add-task').onclick = async () => {
+  const errBox = document.getElementById('task-form-error');
+  const showErr = (msg) => {
+    if (!errBox) return;
+    errBox.textContent = msg;
+    errBox.style.display = 'block';
+  };
+  const clearErr = () => {
+    if (!errBox) return;
+    errBox.textContent = '';
+    errBox.style.display = 'none';
+  };
+
+  try {
+    clearErr();
+    if (typeof apiFetch !== 'function') {
+      showErr('Client error: apiFetch is not available (app.js failed to load).');
+      return;
+    }
+
+    const titleEl = document.getElementById('task-title');
+    const deadlineEl = document.getElementById('task-deadline');
+    const priorityEl = document.getElementById('task-priority');
+
+    if (!titleEl || !deadlineEl || !priorityEl) {
+      showErr('Client error: task form elements are missing from the page.');
+      return;
+    }
+
+    const title = titleEl.value.trim();
+    const deadline = deadlineEl.value;
+    const priority = priorityEl.value;
+
+    if (!title || !deadline) {
+      showErr('Please enter both Task Title and Deadline.');
+      return;
+    }
+
+    const res = await apiFetch('/tasks', 'POST', { title, deadline, priority });
+    if (!res || !res.success) {
+      showErr(res?.message || 'Failed to commit task.');
+      return;
+    }
+
+    titleEl.value = '';
+    deadlineEl.value = '';
+    priorityEl.value = 'medium';
+
     taskPage = 1;
-    loadTasks();
+    await loadTasks();
+  } catch (e) {
+    showErr('Unexpected error while committing task.');
   }
-};
+});
+
 loadTasks();
+
 </script>
 </body>
 </html>
