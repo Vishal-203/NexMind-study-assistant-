@@ -73,20 +73,26 @@ function getData(name){ const v = localStorage.getItem(name); return v ? JSON.pa
 function applyDarkMode(isDark) {
   document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
   document.body.classList.toggle('dark-mode', !!isDark);
+  document.querySelectorAll('[data-theme-label]').forEach((label) => {
+    label.textContent = isDark ? 'Dark' : 'Light';
+  });
+  document.querySelectorAll('[data-theme-icon]').forEach((icon) => {
+    icon.textContent = isDark ? 'D' : 'L';
+  });
 }
 
-function initDarkMode() {
-  const isDark = localStorage.getItem('darkMode') === 'true';
-  applyDarkMode(isDark);
-  const toggle = document.getElementById('dark-mode-toggle');
-  if(toggle) {
-    toggle.checked = isDark;
-    toggle.onchange = () => {
-      localStorage.setItem('darkMode', toggle.checked);
-      applyDarkMode(toggle.checked);
-    };
-  }
+function createThemeToggle() {
+  // Intentionally disabled globally.
+  // Theme switching UI should only be added inside the dedicated Settings page.
 }
+
+
+function initDarkMode() {
+  const storedPreference = localStorage.getItem('darkMode');
+  const isDark = storedPreference === null ? true : storedPreference === 'true';
+  applyDarkMode(isDark);
+}
+
 
 function initSidebar() {
   const sidebar = document.getElementById('sidebar');
@@ -125,4 +131,8 @@ function initSidebar() {
     }
   });
 }
+
+document.addEventListener('DOMContentLoaded', () => {
+  initDarkMode();
+});
 

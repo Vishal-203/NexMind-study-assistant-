@@ -37,6 +37,40 @@
   --radius-sm: 8px;
 }
 
+html[data-theme="light"] {
+  --primary: #0891B2;
+  --primary-light: #67E8F9;
+  --primary-dark: #155E75;
+  --secondary: #172554;
+  --accent: #7C3AED;
+
+  --error: #BE123C;
+  --success: #047857;
+
+  --bg-main: #F5FAFF;
+  --bg-subtle: rgba(226, 245, 255, 0.82);
+  --bg-gradient: linear-gradient(135deg, #F8FDFF 0%, #EAF8FF 48%, #F4F0FF 100%);
+
+  --card-bg: rgba(255, 255, 255, 0.82);
+  --card-border: 1px solid rgba(8, 145, 178, 0.18);
+  --card-shadow: 0 18px 46px rgba(15, 23, 42, 0.12);
+
+  --text-main: rgba(15, 23, 42, 0.94);
+  --text-muted: rgba(71, 85, 105, 0.86);
+
+  --sidebar-bg: rgba(255, 255, 255, 0.78);
+  --sidebar-border: rgba(8, 145, 178, 0.18);
+
+  --input-bg: rgba(255, 255, 255, 0.88);
+  --input-border: rgba(14, 116, 144, 0.22);
+
+  --accent-soft: rgba(8, 145, 178, 0.08);
+  --accent-strong: rgba(124, 58, 237, 0.14);
+
+  --soft-neon-glow: rgba(8, 145, 178, 0.18);
+  --purple-glow: rgba(124, 58, 237, 0.14);
+}
+
 
 
 * {
@@ -1399,6 +1433,13 @@ h3 { font-size: 1.25rem; }
   backdrop-filter: none;
 }
 
+html[data-theme="light"] body {
+  background-image:
+    radial-gradient(circle at 10% 10%, rgba(8, 145, 178, 0.11) 0, transparent 32%),
+    radial-gradient(circle at 88% 18%, rgba(124, 58, 237, 0.10) 0, transparent 28%),
+    radial-gradient(circle at 50% 90%, rgba(14, 165, 233, 0.10) 0, transparent 24%);
+}
+
 
 
 
@@ -1878,6 +1919,99 @@ h3 { font-size: 1.25rem; }
   background: rgba(0, 0, 0, 0.28);
 }
 
+/* Theme Toggle (settings only) */
+.theme-toggle {
+
+  --toggle-bg: rgba(255, 255, 255, 0.08);
+  --toggle-border: rgba(255, 255, 255, 0.18);
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  z-index: 500;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.45rem 0.75rem;
+  background: var(--toggle-bg);
+  border: 1px solid var(--toggle-border);
+  border-radius: 999px;
+  cursor: pointer;
+  user-select: none;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.theme-toggle input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.theme-toggle__track {
+  width: 46px;
+  height: 26px;
+  background: rgba(255, 255, 255, 0.10);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 999px;
+  position: relative;
+  transition: var(--transition);
+  flex: 0 0 auto;
+}
+
+.theme-toggle__thumb {
+  position: absolute;
+  top: 50%;
+  left: 3px;
+  transform: translateY(-50%);
+  width: 20px;
+  height: 20px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, rgba(102, 255, 242, 0.95), rgba(167, 139, 250, 0.88));
+  color: #050505;
+  font-weight: 900;
+  font-size: 0.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.25s ease, background 0.25s ease;
+}
+
+.theme-toggle__label {
+  font-size: 0.85rem;
+  font-weight: 800;
+  color: rgba(244, 244, 245, 0.88);
+  white-space: nowrap;
+}
+
+/* Corner variant used on admin pages */
+.theme-toggle--corner {
+  position: fixed;
+  top: 1rem;
+  right: 1rem;
+}
+
+html[data-theme="light"] .theme-toggle {
+  --toggle-bg: rgba(255, 255, 255, 0.72);
+  --toggle-border: rgba(8, 145, 178, 0.22);
+}
+
+html[data-theme="light"] .theme-toggle__label {
+  color: rgba(5, 5, 5, 0.82);
+}
+
+html[data-theme="light"] .theme-toggle__track {
+  background: rgba(8, 145, 178, 0.08);
+  border-color: rgba(8, 145, 178, 0.18);
+}
+
+/* Checkbox state (works even though app.js creates the markup dynamically) */
+.theme-toggle input:checked ~ .theme-toggle__track .theme-toggle__thumb {
+  transform: translate(20px, -50%);
+}
+
+
 .chat-messages {
   flex: 1;
   overflow-y: auto;
@@ -1954,6 +2088,49 @@ h3 { font-size: 1.25rem; }
   outline: none;
   border-color: var(--primary);
 }
+
+/* Chat page input (ai-chat.html) */
+#chat-input-page {
+  flex: 1;
+  padding: 0.85rem 1rem;
+  background: var(--card-bg);
+  border: 1px solid var(--input-border);
+  border-radius: var(--radius);
+  font-size: 0.95rem;
+  margin-bottom: 0;
+  color: var(--text-main);
+}
+
+#chat-input-page::placeholder {
+  color: var(--text-muted);
+}
+
+#chat-input-page:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(102, 255, 242, 0.14);
+}
+
+#chat-send-btn-page {
+  padding: 0.75rem 1.25rem;
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+  color: #050505;
+  border: none;
+  border-radius: var(--radius);
+  font-weight: 700;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+#chat-send-btn-page:hover:not(:disabled) {
+  filter: saturate(1.05);
+}
+
+#chat-send-btn-page:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
 
 #chat-send-btn {
   padding: 0.75rem 1.25rem;

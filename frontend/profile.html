@@ -9,7 +9,7 @@
 <div class="app-container">
   <aside class="sidebar">
     <div class="sidebar-logo" aria-label="AI Study Assistant">
-assets/study-logo-theme.png
+<img class="sidebar-logo__img brand-logo--neon" src="assets/study-logo-theme.png" alt="" aria-hidden="true" />
       <span class="sidebar-logo__text">AI-STUDY ASSISTANT</span>
     </div>
 <nav class="nav-links">
@@ -27,7 +27,10 @@ assets/study-logo-theme.png
       <p class="auth-kicker">Identity & Access</p>
       <h1>Profile Control</h1>
       <p class="section-intro">Manage your neural identity and review system-wide activity metrics.</p>
+
+      <div id="theme-toggle-settings" style="margin-top: 1.25rem;" aria-label="Theme settings"></div>
     </section>
+
 
     <div class="grid-2">
       <div class="card">
@@ -92,6 +95,34 @@ assets/study-logo-theme.png
 <script>
 requireAuth();
 initDarkMode();
+
+// Settings-only theme toggle (Profile page)
+(function initSettingsThemeToggle(){
+  const container = document.getElementById('theme-toggle-settings');
+  if(!container) return;
+
+  const isDark = localStorage.getItem('darkMode') === null ? true : localStorage.getItem('darkMode') === 'true';
+
+  container.innerHTML = `
+    <label class="theme-toggle theme-toggle--corner" style="position: static; right: auto; top: auto;">
+      <input id="dark-mode-toggle" type="checkbox" />
+      <span class="theme-toggle__track" aria-hidden="true">
+        <span class="theme-toggle__thumb" data-theme-icon>${isDark ? 'D' : 'L'}</span>
+      </span>
+      <span class="theme-toggle__label" data-theme-label>${isDark ? 'Dark' : 'Light'}</span>
+    </label>
+  `;
+
+  const toggle = document.getElementById('dark-mode-toggle');
+  if(toggle){
+    toggle.checked = isDark;
+    toggle.onchange = () => {
+      localStorage.setItem('darkMode', toggle.checked);
+      applyDarkMode(toggle.checked);
+    };
+  }
+})();
+
 
 document.getElementById('logout-sidebar').onclick = (e) => {
   e.preventDefault();
