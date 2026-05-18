@@ -5,6 +5,7 @@ bcrypt
 flask-cors
 openai
 flask-jwt-extended
+groq
 pypdf
 python-docx
 pillow
