@@ -1,4 +1,4 @@
-<!doctype html>
+id you solve d<!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8" />
@@ -91,7 +91,7 @@ Access your stored information notes.
 
 <div id="share-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:1000; align-items:center; justify-content:center; backdrop-filter: blur(5px);">
   <div class="card" style="max-width:500px; width:90%; margin:0;">
-    <h3>Share Node</h3>
+    <h3>Share Note</h3>
     <p id="share-msg" style="color:var(--primary); font-size: 0.9rem;"></p>
     <input id="share-email" class="input-field" placeholder="Recipient Network ID (Email)" />
     <div style="display:flex; gap:0.5rem;">
@@ -130,7 +130,7 @@ Access your stored information notes.
 <script src="app.js"></script>
 <script src="neural-bg.js"></script>
 <script src="chat-widget.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script>
 requireAuth();
 initDarkMode();
@@ -395,9 +395,14 @@ document.getElementById('save-note').onclick = async ()=>{
   const sub = document.getElementById('note-subject').value.trim();
   const top = document.getElementById('note-topic').value.trim();
   const content = document.getElementById('note-content').value;
+  // Debug: verify the click handler and payload.
+  console.log('save-note click', { sub, top, contentLen: (content || '').length });
   const tagsInput = document.getElementById('note-tags').value.trim();
   const tags = tagsInput ? tagsInput.split(',').map(t=>t.trim()).filter(t=>t) : [];
-  if(!sub || !top) return;
+  if(!sub || !top) {
+    console.warn('Save Note missing subject/topic', { sub, top });
+    return;
+  }
   const res = await apiFetch('/notes','POST',{subject:sub,topic:top,content,tags});
   if(res.success){
     document.getElementById('note-subject').value = '';
@@ -455,58 +460,120 @@ window.editNote = async(id)=>{
 
 window.viewNote = async(id)=>{
   const r = await apiFetch(`/notes/${id}`);
-  if(r.success) alert(`Node Data:\n\n${r.data.content || 'Empty'}`);
+  if(r.success) alert(`Note Data:\n\n${r.data.content || 'Empty'}`);
 };
 
-window.deleteNote = async(id)=>{ if(confirm('Delete node?')) { await apiFetch(`/notes/${id}`,'DELETE'); loadNotes(); } };
-
+window.deleteNote = async(id)=>{ if(confirm('Delete note?')) { await apiFetch(`/notes/${id}`,'DELETE'); loadNotes(); } };
 window.exportPDF = async(id) => {
   const r = await apiFetch(`/notes/${id}`);
-  if(!r.success) return;
+  if(!r.success){ alert('Failed to load note.'); return; }
   const n = r.data;
 
-  const el = document.createElement('div');
-  el.style.padding = '20px';
-  el.style.color = '#000';
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ unit: 'pt', format: 'a4', orientation: 'portrait' });
 
-  // Backend stores the note text in `content`.
-  // Export deterministically from that field.
-  const rawContent = (n?.content ?? '').toString().trim();
-  const hasRealText = rawContent && rawContent !== '[Visual Map]';
-  const contentHtml = hasRealText ? `<p>${rawContent.replace(/\n/g, '<br>')}</p>` : '';
+  const pageW = doc.internal.pageSize.getWidth();
+  const pageH = doc.internal.pageSize.getHeight();
+  const margin = 40;
+  const contentWidth = pageW - margin * 2;
+  let y = margin;
 
-  const drawingHtml = n.drawing
-    ? `<div style="margin-top:14px;">
-         <p><strong>Visual:</strong></p>
-         <img src="${n.drawing}" style="max-width:100%; border:1px solid rgba(0,0,0,0.15); border-radius:10px;" />
-       </div>`
-    : '';
-
-  el.innerHTML = `<h2>${n.subject}</h2><p><strong>Topic:</strong> ${n.topic}</p><hr>${contentHtml}${drawingHtml}`;
-
-  // html2pdf is more reliable when the node is attached to the DOM
-  // (helps avoid blank/empty PDFs)
-  el.style.position = 'fixed';
-  el.style.left = '-10000px';
-  el.style.top = '0';
-  el.style.background = '#fff';
-  document.body.appendChild(el);
-
-  try {
-    await html2pdf()
-      .set({
-        margin: 10,
-        filename: `${n.subject}.pdf`,
-        image: { type: 'jpeg', quality: 0.98 },
-        html2canvas: { scale: 2, useCORS: true },
-        jsPDF: { unit: 'pt', format: 'a4', orientation: 'portrait' },
-      })
-      .from(el)
-      .save();
-  } finally {
-    el.remove();
+  function checkPageBreak(needed) {
+    needed = needed || 20;
+    if (y + needed > pageH - margin) { doc.addPage(); y = margin; }
   }
+
+  function drawWrappedText(text, fontSize, isBold, r, g, b) {
+    doc.setFontSize(fontSize);
+    doc.setFont('helvetica', isBold ? 'bold' : 'normal');
+    doc.setTextColor(r, g, b);
+    var lines = doc.splitTextToSize(String(text || ''), contentWidth);
+    lines.forEach(function(line) {
+      checkPageBreak(fontSize + 4);
+      doc.text(line, margin, y);
+      y += fontSize + 4;
+    });
+  }
+
+  // Header bar
+  doc.setFillColor(30, 30, 60);
+  doc.rect(0, 0, pageW, 54, 'F');
+  doc.setFontSize(16);
+  doc.setFont('helvetica', 'bold');
+  doc.setTextColor(255, 255, 255);
+  doc.text('AI Study Assistant — Note Export', margin, 34);
+  y = 74;
+
+  // Subject
+  drawWrappedText(n.subject || 'Untitled', 18, true, 20, 20, 80);
+  y += 4;
+
+  // Topic
+  drawWrappedText('Topic: ' + (n.topic || '—'), 12, false, 80, 80, 80);
+  y += 2;
+
+  // Tags
+  if (n.tags && n.tags.length) {
+    drawWrappedText('Tags: ' + n.tags.join(', '), 11, false, 100, 100, 140);
+    y += 2;
+  }
+
+  // Divider
+  doc.setDrawColor(180, 180, 220);
+  doc.setLineWidth(0.8);
+  doc.line(margin, y, pageW - margin, y);
+  y += 14;
+
+  // Content
+  var rawContent = ((n && n.content) ? n.content : '').toString().trim();
+  var hasRealText = rawContent && rawContent !== '[Visual Map]';
+
+  if (hasRealText) {
+    var paragraphs = rawContent.split('\n');
+    paragraphs.forEach(function(para) {
+      var t = para.trim();
+      if (!t) { y += 8; return; }
+      drawWrappedText(t, 12, false, 30, 30, 30);
+      y += 4;
+    });
+  } else {
+    drawWrappedText('[No text content — visual map note]', 12, false, 150, 150, 150);
+  }
+
+  // Drawing
+  if (n.drawing) {
+    y += 12;
+    checkPageBreak(30);
+    drawWrappedText('Visual Sketch:', 12, true, 20, 20, 80);
+    y += 6;
+    try {
+      var imgProps = doc.getImageProperties(n.drawing);
+      var ratio = imgProps.width / imgProps.height;
+      var imgW = Math.min(contentWidth, 480);
+      var imgH = imgW / ratio;
+      checkPageBreak(imgH + 10);
+      doc.addImage(n.drawing, 'PNG', margin, y, imgW, imgH);
+      y += imgH + 10;
+    } catch(e) {
+      drawWrappedText('[Visual sketch could not be embedded]', 11, false, 180, 80, 80);
+    }
+  }
+
+  // Footer on every page
+  var totalPages = doc.internal.getNumberOfPages();
+  for (var i = 1; i <= totalPages; i++) {
+    doc.setPage(i);
+    doc.setFontSize(9);
+    doc.setTextColor(160, 160, 160);
+    doc.text(
+      'Exported ' + new Date().toLocaleDateString() + '  •  Page ' + i + ' of ' + totalPages,
+      margin, pageH - 18
+    );
+  }
+
+  doc.save(((n.subject || 'note').replace(/[^a-z0-9]/gi, '_')) + '.pdf');
 };
+
 
 // =============================
 // Flashcards (Last-minute SRS)
@@ -807,5 +874,3 @@ function rateCard(rating){
 </script>
 </body>
 </html>
-
-

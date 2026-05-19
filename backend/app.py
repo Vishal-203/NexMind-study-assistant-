@@ -18,8 +18,6 @@ try:
     from .routes.auth_routes import auth_bp
     from .routes.admin_auth_routes import admin_auth_bp
     from .routes.admin_moderation_routes import admin_moderation_bp
-
-
     from .routes.file_routes import file_bp
     from .routes.note_routes import note_bp
     from .routes.share_routes import share_bp
@@ -27,14 +25,15 @@ try:
     from .routes.user_routes import user_bp
 except ImportError:
     from routes.ai_routes import ai_bp
-
     from routes.auth_routes import auth_bp
     from routes.admin_auth_routes import admin_auth_bp
+    from routes.admin_moderation_routes import admin_moderation_bp
     from routes.file_routes import file_bp
     from routes.note_routes import note_bp
     from routes.share_routes import share_bp
     from routes.task_routes import task_bp
     from routes.user_routes import user_bp
+
 
 def _ensure_indexes(app):
     db = app.mongo.db
@@ -74,21 +73,18 @@ def create_app():
     app.mongo = mongo
     app.jwt = jwt
 
+    # Authentication & Admin Blueprints
     app.register_blueprint(auth_bp, url_prefix='/api/auth')
     app.register_blueprint(admin_auth_bp, url_prefix='/api/auth')
+    app.register_blueprint(admin_moderation_bp, url_prefix='/api/auth')
+
     try:
         from .routes.password_reset_routes import password_reset_bp
         app.register_blueprint(password_reset_bp, url_prefix='/api/auth')
     except Exception:
         pass
 
-    try:
-        from .routes.admin_moderation_routes import admin_moderation_bp
-        app.register_blueprint(admin_moderation_bp, url_prefix='/api/auth')
-    except Exception:
-        pass
-
-
+    # Feature Blueprints
     app.register_blueprint(note_bp, url_prefix='/api/notes')
     app.register_blueprint(task_bp, url_prefix='/api/tasks')
     app.register_blueprint(ai_bp, url_prefix='/api/ai')
@@ -118,4 +114,3 @@ if __name__ == '__main__':
     port = int(os.getenv('PORT', 5000))
     debug = os.getenv('FLASK_ENV', 'development') == 'development'
     app.run(host=host, port=port, debug=debug)
-

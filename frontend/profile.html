@@ -96,32 +96,22 @@
 requireAuth();
 initDarkMode();
 
-// Settings-only theme toggle (Profile page)
-(function initSettingsThemeToggle(){
+// Keep only Dark theme on Profile page (theme toggle removed)
+(function keepDarkThemeOnly(){
   const container = document.getElementById('theme-toggle-settings');
   if(!container) return;
 
-  const isDark = localStorage.getItem('darkMode') === null ? true : localStorage.getItem('darkMode') === 'true';
+  // Force dark preference and apply it
+  localStorage.setItem('darkMode', 'true');
+  applyDarkMode(true);
 
-  container.innerHTML = `
-    <label class="theme-toggle theme-toggle--corner" style="position: static; right: auto; top: auto;">
-      <input id="dark-mode-toggle" type="checkbox" />
-      <span class="theme-toggle__track" aria-hidden="true">
-        <span class="theme-toggle__thumb" data-theme-icon>${isDark ? 'D' : 'L'}</span>
-      </span>
-      <span class="theme-toggle__label" data-theme-label>${isDark ? 'Dark' : 'Light'}</span>
-    </label>
-  `;
-
-  const toggle = document.getElementById('dark-mode-toggle');
-  if(toggle){
-    toggle.checked = isDark;
-    toggle.onchange = () => {
-      localStorage.setItem('darkMode', toggle.checked);
-      applyDarkMode(toggle.checked);
-    };
-  }
+  container.innerHTML = '';
 })();
+
+
+
+
+
 
 
 document.getElementById('logout-sidebar').onclick = (e) => {

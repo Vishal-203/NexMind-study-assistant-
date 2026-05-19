@@ -28,7 +28,7 @@
   <main class="main-content">
     <section class="page-hero dashboard-hero">
       <p class="auth-kicker">Study Dashboard</p>
-      <h1>Welcome back.</h1>
+<h1 id="dashboard-welcome">Welcome</h1>
       <p class="section-intro">Your AI Assistant is ready. Check your momentum and resume your progress.</p>
     </section>
 
@@ -93,7 +93,7 @@
   </main>
 </div>
 
-window.location='ai-chat.html';
+
 
 <!-- Chat Widget -->
 <div id="chat-widget" class="chat-widget">
@@ -171,6 +171,7 @@ async function loadRecentNotes() {
 }
 
 async function loadCheckpoint() {
+
   const taskRes = await apiFetch('/tasks?limit=1');
   const noteRes = await apiFetch('/notes?limit=1');
   const statsRes = await apiFetch('/user/stats');
@@ -210,9 +211,29 @@ checkpointHeading.textContent = 'AI Match: Next task ready';
   checkpointNoteAction.onclick = () => window.location = 'notebook.html';
 }
 
+async function applyDashboardWelcome() {
+  const headingEl = document.getElementById('dashboard-welcome');
+  if (!headingEl) return;
+
+  const user = JSON.parse(localStorage.getItem('user') || '{}');
+  const name = (user.name || user.username || user.full_name || '').trim();
+
+  // Heuristic: if this is a returning session, show “Welcome back …”.
+  // New users typically won't have any prior dashboard flag.
+  const returning = localStorage.getItem('hasSeenDashboard') === 'true';
+  if (!returning) localStorage.setItem('hasSeenDashboard', 'true');
+
+  if (name) {
+    headingEl.textContent = returning ? `Welcome back, ${name}` : `Welcome, ${name}`;
+  } else {
+    headingEl.textContent = returning ? 'Welcome back' : 'Welcome';
+  }
+}
+
 loadStats();
 loadRecentNotes();
 loadCheckpoint();
+applyDashboardWelcome();
 </script>
 </body>
 </html>
