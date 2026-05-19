@@ -10,6 +10,8 @@ This project is a full-stack study assistant platform.
 
 ## Key fixes (registration + login issues)
 
+
+
 ### 1) Server error 500 on registration
 Registration (`POST /api/auth/register`) previously failed with **500** due to MongoDB index creation throwing:
 

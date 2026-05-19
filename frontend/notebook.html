@@ -18,6 +18,7 @@
       <a href="ai_assistant.html">AI Assistant</a>
       <a href="planner.html">Tasks</a>
       <a href="profile.html">Profile</a>
+
       <a href="#" id="logout-sidebar">Logout</a>
     </nav>
   </aside>
@@ -103,7 +104,12 @@ Access your stored information notes.
   </div>
 </div>
 
+
+
+</div>
+
 <button class="ask-ai-btn" onclick="openChatWidget()">Ask AI</button>
+
 
 <!-- Chat Widget -->
 <div id="chat-widget" class="chat-widget">
@@ -211,15 +217,18 @@ async function loadNotes(filter=''){
         <div style="font-weight: 700;">${n.subject}</div>
         <div style="font-size: 0.8rem; color: var(--text-muted);">${n.topic}</div>
         ${tagsHtml}
-        <div style="display:flex; gap:0.5rem; margin-top:0.75rem;">
+        <div style="display:flex; gap:0.5rem; margin-top:0.75rem; flex-wrap:wrap;">
           <button class="btn btn-secondary" style="padding: 0.3rem 0.8rem; font-size: 0.7rem;" onclick="editNote('${n.id}')">Edit</button>
           <button class="btn btn-secondary" style="padding: 0.3rem 0.8rem; font-size: 0.7rem;" onclick="exportPDF('${n.id}')">PDF</button>
           <button class="btn btn-secondary" style="padding: 0.3rem 0.8rem; font-size: 0.7rem;" onclick="openShareModal('${n.id}')">Share</button>
+          <button class="btn btn-muted" style="padding: 0.3rem 0.8rem; font-size: 0.7rem;" onclick="makeFlashcards('${n.id}')">Make Flashcards</button>
+          <button class="btn btn-secondary" style="padding: 0.3rem 0.8rem; font-size: 0.7rem;" onclick="openStudy('${n.id}')">Study</button>
           <button class="btn btn-muted" style="padding: 0.3rem 0.8rem; font-size: 0.7rem;" onclick="deleteNote('${n.id}')">Delete</button>
         </div>
       `;
       list.appendChild(li);
     });
+
   }
   updateNotePagination(r.data);
 }
@@ -460,9 +469,9 @@ window.exportPDF = async(id) => {
   el.style.padding = '20px';
   el.style.color = '#000';
 
-  // Content may be stored in different fields depending on how the note was created/imported.
-  const contentCandidates = [n.content, n.text, n.note_content, n.body, n.note_body];
-  const rawContent = (contentCandidates.find(v => (v ?? '').toString().trim().length > 0) ?? '').toString().trim();
+  // Backend stores the note text in `content`.
+  // Export deterministically from that field.
+  const rawContent = (n?.content ?? '').toString().trim();
   const hasRealText = rawContent && rawContent !== '[Visual Map]';
   const contentHtml = hasRealText ? `<p>${rawContent.replace(/\n/g, '<br>')}</p>` : '';
 
@@ -474,9 +483,329 @@ window.exportPDF = async(id) => {
     : '';
 
   el.innerHTML = `<h2>${n.subject}</h2><p><strong>Topic:</strong> ${n.topic}</p><hr>${contentHtml}${drawingHtml}`;
-  html2pdf().set({ margin: 10, filename: `${n.subject}.pdf` }).from(el).save();
+
+  // html2pdf is more reliable when the node is attached to the DOM
+  // (helps avoid blank/empty PDFs)
+  el.style.position = 'fixed';
+  el.style.left = '-10000px';
+  el.style.top = '0';
+  el.style.background = '#fff';
+  document.body.appendChild(el);
+
+  try {
+    await html2pdf()
+      .set({
+        margin: 10,
+        filename: `${n.subject}.pdf`,
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { scale: 2, useCORS: true },
+        jsPDF: { unit: 'pt', format: 'a4', orientation: 'portrait' },
+      })
+      .from(el)
+      .save();
+  } finally {
+    el.remove();
+  }
 };
+
+// =============================
+// Flashcards (Last-minute SRS)
+// =============================
+
+let currentStudyNoteId = null;
+let currentStudyCardIndex = 0;
+let currentStudyCards = [];
+let currentStudyRevealed = false;
+
+function _flashKey(noteId){ return `flashcards:${noteId}`; }
+function _progressKey(noteId){ return `flashcardsProgress:${noteId}`; }
+
+function _safeText(s){
+  return (s ?? '').toString();
+}
+
+function _splitToCandidates(text){
+  const t = _safeText(text).replace(/\r/g,'').trim();
+  if(!t) return [];
+
+  // prefer bullet/line items
+  const lines = t.split('\n').map(x=>x.trim()).filter(Boolean);
+  let candidates = [];
+
+  // If it looks like a bullet list, use lines
+  if(lines.length >= 3){
+    candidates = lines;
+  } else {
+    // otherwise split by sentences
+    candidates = t.split(/(?<=[.!?])\s+/).map(x=>x.trim()).filter(Boolean);
+  }
+
+  // remove very short noise
+  candidates = candidates.filter(x => x.length >= 6);
+  return candidates;
+}
+
+function _generateCardsFromNote(note){
+  const content = _safeText(note?.content);
+  const subject = _safeText(note?.subject);
+  const topic = _safeText(note?.topic);
+
+  if(!content || content.trim() === '' || content.trim() === '[Visual Map]') return [];
+
+  const candidates = _splitToCandidates(content);
+  if(candidates.length === 0) return [];
+
+  // Turn each candidate into a short Q/A.
+  // Keep Q short; A is candidate (trimmed).
+  const cards = candidates.slice(0, 10).map((c, idx) => {
+    let q = c;
+
+    // heuristic: try to create questions
+    // If it starts with “X is/are/means” make “What is X?”
+    const m = c.match(/^([^\s].{0,80}?)\s+(is|are|means|refers to)\b/i);
+    if(m && m[1]){
+      q = `What is ${m[1].replace(/[,.;:]+$/,'').trim()}?`;
+    } else {
+      q = `Explain: ${c.length > 80 ? c.slice(0,80).trim() + '…' : c}`;
+    }
+
+    const a = c.length > 220 ? c.slice(0,220).trim() + '…' : c;
+    return {
+      id: `${note.id || 'note'}:${idx}`,
+      q,
+      a
+    };
+  });
+
+  // If we have topic/subject, add one contextual card if content is too sparse
+  if(cards.length < 5 && (topic || subject)){
+    const ctx = [subject && `Subject: ${subject}`, topic && `Topic: ${topic}`].filter(Boolean).join(' | ');
+    if(ctx){
+      cards.unshift({ id: `${note.id || 'note'}:ctx`, q: `What are the key ideas about ${topic || subject}?`, a: ctx });
+    }
+  }
+
+  return cards;
+}
+
+function _loadProgress(noteId){
+  try {
+    return JSON.parse(localStorage.getItem(_progressKey(noteId)) || 'null') || {};
+  } catch{
+    return {};
+  }
+}
+
+function _saveProgress(noteId, progress){
+  localStorage.setItem(_progressKey(noteId), JSON.stringify(progress || {}));
+}
+
+function _scheduleNext(nowMs, current){
+  // current: { intervalMs, nextDueMs, lapses }
+  const intervalMs = current?.intervalMs ?? 0;
+
+  // last-minute friendly defaults
+  if(!intervalMs || intervalMs <= 0){
+    if(current?.lastRating === 'again') intervalMs = 2 * 60 * 1000;
+    else intervalMs = 10 * 60 * 1000;
+  }
+
+  return intervalMs;
+}
+
+function _applyRating(noteId, cardIdx, rating){
+  const now = Date.now();
+  const cards = currentStudyCards;
+  const card = cards[cardIdx];
+  if(!card) return;
+
+  const progress = _loadProgress(noteId);
+  const cardKey = card.id || String(cardIdx);
+  const cur = progress[cardKey] || { intervalMs: 0, nextDueMs: now, lastRating: null };
+
+  let nextDueMs = now;
+  let intervalMs = cur.intervalMs || 0;
+
+  if(rating === 'again'){
+    intervalMs = Math.max(60 * 1000, (intervalMs ? intervalMs * 0.2 : 2 * 60 * 1000));
+    nextDueMs = now + intervalMs;
+  } else if(rating === 'good'){
+    // grow interval
+    intervalMs = Math.max(10 * 60 * 1000, intervalMs ? intervalMs * 1.8 : 6 * 60 * 60 * 1000);
+    nextDueMs = now + intervalMs;
+  } else if(rating === 'easy'){
+    intervalMs = Math.max(24 * 60 * 60 * 1000, intervalMs ? intervalMs * 2.6 : 24 * 60 * 60 * 1000);
+    nextDueMs = now + intervalMs;
+  }
+
+  progress[cardKey] = {
+    intervalMs,
+    nextDueMs,
+    lastRating: rating,
+    updatedAtMs: now
+  };
+
+  _saveProgress(noteId, progress);
+  return progress;
+}
+
+function openStudy(noteId){
+  currentStudyNoteId = noteId;
+  currentStudyCardIndex = 0;
+  currentStudyRevealed = false;
+
+  const saved = localStorage.getItem(_flashKey(noteId));
+  const noteTextContent = saved ? saved : null;
+
+  if(!saved){
+    makeFlashcards(noteId);
+    // makeFlashcards will set the modal UI
+    return;
+  }
+
+  try {
+    currentStudyCards = JSON.parse(saved) || [];
+  } catch{
+    currentStudyCards = [];
+  }
+
+  if(!currentStudyCards.length){
+    makeFlashcards(noteId);
+    return;
+  }
+
+  document.getElementById('flashcards-modal').style.display = 'flex';
+  document.getElementById('flashcards-rating').style.display = 'none';
+
+  // pick the next due card
+  const progress = _loadProgress(noteId);
+  const now = Date.now();
+  let dueIdx = currentStudyCards.findIndex(c => {
+    const key = c.id || '';
+    const p = progress[key];
+    return p && typeof p.nextDueMs === 'number' && p.nextDueMs <= now;
+  });
+
+  if(dueIdx < 0) dueIdx = 0;
+  currentStudyCardIndex = dueIdx;
+  currentStudyRevealed = false;
+
+  const card = currentStudyCards[currentStudyCardIndex];
+  document.getElementById('flashcards-meta').textContent = `Note: ${noteId} • Card ${currentStudyCardIndex+1}/${currentStudyCards.length}`;
+  document.getElementById('flashcards-question').textContent = card.q;
+  document.getElementById('flashcards-answer').textContent = '';
+  document.getElementById('flashcards-reveal').disabled = false;
+  document.getElementById('flashcards-rating').style.display = 'none';
+}
+
+function closeStudy(){
+  document.getElementById('flashcards-modal').style.display = 'none';
+  // keep state in case user reopens quickly
+}
+
+async function makeFlashcards(noteId){
+  currentStudyNoteId = noteId;
+  currentStudyCards = [];
+  currentStudyRevealed = false;
+
+  // fetch note content to generate
+  const r = await apiFetch(`/notes/${noteId}`);
+  if(!r.success || !r.data){
+    alert(r.message || 'Failed to load note');
+    return;
+  }
+
+  const note = r.data;
+  // `get_note` returns {id, subject, topic, content, ...}
+  const cards = _generateCardsFromNote(note);
+
+  if(!cards.length){
+    alert('No readable content to generate flashcards. Add text to the note content (not “[Visual Map]”).');
+    return;
+  }
+
+  localStorage.setItem(_flashKey(noteId), JSON.stringify(cards));
+  // init progress with immediate due so user can study now
+  const progress = {};
+  cards.forEach((c, idx) => {
+    const key = c.id || String(idx);
+    progress[key] = { intervalMs: 0, nextDueMs: Date.now(), lastRating: null };
+  });
+  _saveProgress(noteId, progress);
+
+  currentStudyCards = cards;
+  currentStudyCardIndex = 0;
+
+  document.getElementById('flashcards-modal').style.display = 'flex';
+  document.getElementById('flashcards-rating').style.display = 'none';
+
+  document.getElementById('flashcards-meta').textContent = `Note: ${note.subject || noteId} • ${cards.length} cards`;
+  document.getElementById('flashcards-question').textContent = cards[0].q;
+  document.getElementById('flashcards-answer').textContent = '';
+  document.getElementById('flashcards-reveal').disabled = false;
+  document.getElementById('flashcards-progress').textContent = `Due now: ${cards.length}`;
+}
+
+function revealAnswer(){
+  if(!currentStudyCards.length) return;
+  const card = currentStudyCards[currentStudyCardIndex];
+  document.getElementById('flashcards-answer').textContent = card.a;
+  currentStudyRevealed = true;
+  document.getElementById('flashcards-rating').style.display = 'flex';
+}
+
+function rateCard(rating){
+  if(!currentStudyNoteId || !currentStudyCards.length) return;
+  if(!currentStudyRevealed){
+    // require reveal
+    alert('Reveal the answer before rating.');
+    return;
+  }
+
+  const cardIdx = currentStudyCardIndex;
+  _applyRating(currentStudyNoteId, cardIdx, rating);
+
+  // choose next due card
+  const progress = _loadProgress(currentStudyNoteId);
+  const now = Date.now();
+  let nextIdx = -1;
+
+  for(let i=0;i<currentStudyCards.length;i++){
+    const c = currentStudyCards[i];
+    const key = c.id || String(i);
+    const p = progress[key];
+    if(p && typeof p.nextDueMs === 'number' && p.nextDueMs <= now){
+      nextIdx = i;
+      break;
+    }
+  }
+
+  if(nextIdx < 0){
+    // if none due, move forward cyclically
+    nextIdx = (cardIdx + 1) % currentStudyCards.length;
+  }
+
+  currentStudyCardIndex = nextIdx;
+  currentStudyRevealed = false;
+
+  const card = currentStudyCards[currentStudyCardIndex];
+  document.getElementById('flashcards-meta').textContent = `Note: ${currentStudyNoteId} • Card ${currentStudyCardIndex+1}/${currentStudyCards.length}`;
+  document.getElementById('flashcards-question').textContent = card.q;
+  document.getElementById('flashcards-answer').textContent = '';
+
+  document.getElementById('flashcards-rating').style.display = 'none';
+  document.getElementById('flashcards-reveal').disabled = false;
+
+  // update due count
+  const dueCount = currentStudyCards.reduce((acc, c) => {
+    const key = c.id || '';
+    const p = progress[key];
+    return acc + (p && typeof p.nextDueMs === 'number' && p.nextDueMs <= now ? 1 : 0);
+  }, 0);
+  document.getElementById('flashcards-progress').textContent = `Due now: ${dueCount}`;
+}
 </script>
 </body>
 </html>
+
 
