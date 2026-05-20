@@ -1,7 +1,8 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 from flask import current_app, request
 from .admin_auth_controller import admin_required
 from utils.helpers import resp, parse_object_id
+
 
 
 def _format_user(user):
@@ -99,3 +100,62 @@ def block_user(user_id):
 
     status_text = 'blocked' if block else 'unblocked'
     return resp(True, f'User {status_text} successfully', {'id': str(user_id), 'is_blocked': block})
+
+
+def _build_date_buckets(days_back: int):
+    """Returns list of day start/end ranges for UTC dates."""
+    now = datetime.utcnow().date()
+    buckets = []
+    for i in range(days_back - 1, -1, -1):
+        day = now - timedelta(days=i)
+        start = datetime.combine(day, datetime.min.time())
+        end = start + timedelta(days=1)
+        buckets.append((day.isoformat(), start, end))
+    return buckets
+
+
+@admin_required
+def analytics_new_users():
+    days = int(request.args.get('days', default=7, type=int) or 7)
+    days = max(min(days, 30), 1)
+
+    db = current_app.mongo.db
+    points = []
+    for day_str, start, end in _build_date_buckets(days):
+        count = db.users.count_documents({'created_at': {'$gte': start, '$lt': end}})
+        points.append({'date': day_str, 'count': count})
+
+    return resp(True, 'New users analytics fetched', {'points': points})
+
+
+@admin_required
+def analytics_note_activity():
+    days = int(request.args.get('days', default=7, type=int) or 7)
+    days = max(min(days, 30), 1)
+
+    db = current_app.mongo.db
+    points = []
+    for day_str, start, end in _build_date_buckets(days):
+        created = db.notes.count_documents({'created_at': {'$gte': start, '$lt': end}})
+        updated = db.notes.count_documents({'updated_at': {'$gte': start, '$lt': end}})
+        points.append({'date': day_str, 'created': created, 'updated': updated})
+
+    return resp(True, 'Note activity analytics fetched', {'points': points})
+
+
+@admin_required
+def analytics_task_progress():
+    days = int(request.args.get('days', default=7, type=int) or 7)
+    days = max(min(days, 30), 1)
+
+    db = current_app.mongo.db
+    points = []
+    for day_str, start, end in _build_date_buckets(days):
+        # Consider tasks created on that day; compute completion rate among them.
+        total = db.tasks.count_documents({'created_at': {'$gte': start, '$lt': end}})
+        completed = db.tasks.count_documents({'created_at': {'$gte': start, '$lt': end}, 'status': 'completed'})
+        pct = 0 if total == 0 else round((completed / total) * 100, 2)
+        points.append({'date': day_str, 'completed': completed, 'total': total, 'completion_pct': pct})
+
+    return resp(True, 'Task progress analytics fetched', {'points': points})
+

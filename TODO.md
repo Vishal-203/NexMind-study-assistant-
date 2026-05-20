@@ -1,11 +1,20 @@
-# TODO
+# Admin Control Center - Analytics Visualization
 
-- [x] Update `frontend/notebook.html` Visual Mapping card:
-  - [x] Add dedicated subject/topic bar inputs for the sketch card
-  - [x] Update `save-drawing` handler to read those inputs and save sketch to `/notes`
-  - [x] Update `editNote` to populate those Visual Mapping inputs when note has `drawing`
-- [ ] Manual test in browser:
-  - [ ] Create a visual map with subject/topic, save, verify appears in My Knowledge
-  - [ ] Edit the saved sketch and verify canvas + inputs restore
+## Plan
+- Add backend time-series endpoints for:
+  - New users (signups per day for last 7 days)
+  - Note activity (created+updated per day for last 7 days)
+  - Task progress (completion % per day for last 7 days)
+- Add frontend data visualization in `frontend/admin/admin-dashboard.html`.
 
+## Backend steps
+- [ ] Implement endpoints in `backend/controllers/admin_controller.py`.
+- [ ] Wire routes in `backend/routes/admin_auth_routes.py`.
+
+## Frontend steps
+- [ ] Add chart UI sections (simple SVG/canvas) in `frontend/admin/admin-dashboard.html`.
+- [ ] Fetch chart data and render charts in the dashboard script.
+
+## Testing
+- [ ] Load admin dashboard and verify charts render and update on refresh.
 

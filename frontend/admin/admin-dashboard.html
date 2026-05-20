@@ -151,24 +151,37 @@
         <div class="page-header">
           <div>
             <h3>Platform performance</h3>
-            <p class="section-intro">Review key trends and health signals at a glance.</p>
-          </div>
-        </div>
-        <div class="admin-action-grid">
-          <div class="setting-card">
-            <h4>Engagement</h4>
-            <p id="admin-engagement-copy">Loading...</p>
-          </div>
-          <div class="setting-card">
-            <h4>Content health</h4>
-            <p id="admin-content-health-copy">Loading...</p>
-          </div>
-          <div class="setting-card">
-            <h4>System alerts</h4>
-            <p id="admin-system-alerts-copy">Loading...</p>
+            <p class="section-intro">Trends: new users, note activity, and task progress.</p>
           </div>
         </div>
 
+        <div class="admin-action-grid" style="grid-template-columns: repeat(3, minmax(220px, 1fr));">
+          <div class="setting-card">
+            <h4>New Users (7d)</h4>
+            <div style="display:flex; align-items:center; justify-content:space-between; gap:1rem; margin-bottom:0.5rem;">
+              <p id="admin-new-users-total">—</p>
+              <p id="admin-new-users-last">—</p>
+            </div>
+            <canvas id="chart-new-users" style="width:100%; height:170px;"></canvas>
+          </div>
+
+          <div class="setting-card">
+            <h4>Note Activity (7d)</h4>
+            <div style="display:flex; gap:0.75rem; align-items:center; margin-bottom:0.5rem;">
+              <span class="admin-legend"><span class="admin-legend__dot" style="background:rgba(102,255,242,0.95)"></span>Created</span>
+              <span class="admin-legend"><span class="admin-legend__dot" style="background:rgba(167,139,250,0.95)"></span>Updated</span>
+            </div>
+            <canvas id="chart-note-activity" style="width:100%; height:170px;"></canvas>
+          </div>
+
+          <div class="setting-card">
+            <h4>Task Progress (7d)</h4>
+            <div style="display:flex; align-items:center; justify-content:space-between; gap:1rem; margin-bottom:0.5rem;">
+              <p id="admin-task-progress-last">—</p>
+            </div>
+            <canvas id="chart-task-progress" style="width:100%; height:170px;"></canvas>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -196,19 +209,191 @@
 requireAuth();
 initDarkMode();
 
+function drawBars(canvasId, labels, values, options = {}) {
+  const canvas = document.getElementById(canvasId);
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const w = canvas.width = canvas.clientWidth;
+  const h = canvas.height = Math.floor(canvas.clientHeight);
+
+  ctx.clearRect(0, 0, w, h);
+  const pad = 14;
+  const barCount = Math.max(values.length, 1);
+  const maxVal = Math.max(...values, 1);
+  const gap = Math.max(6, Math.floor((w - pad * 2) / (barCount * 6)));
+  const barW = Math.floor((w - pad * 2 - gap * (barCount - 1)) / barCount);
+
+  // grid
+  ctx.strokeStyle = 'rgba(255,255,255,0.08)';
+  ctx.lineWidth = 1;
+  const gridLines = 4;
+  for (let i = 0; i <= gridLines; i++) {
+    const y = pad + (h - pad * 2) * (i / gridLines);
+    ctx.beginPath();
+    ctx.moveTo(pad, y);
+    ctx.lineTo(w - pad, y);
+    ctx.stroke();
+  }
+
+  // bars
+  const color = options.color || 'rgba(102,255,242,0.95)';
+  ctx.fillStyle = color;
+  ctx.strokeStyle = color;
+  ctx.lineWidth = 1;
+
+  labels.forEach((label, i) => {
+    const v = values[i] ?? 0;
+    const x = pad + i * (barW + gap);
+    const barH = (h - pad * 2) * (v / maxVal);
+    const y = h - pad - barH;
+    const radius = Math.min(10, barW / 2);
+
+    // rounded rect
+    ctx.beginPath();
+    ctx.moveTo(x + radius, y);
+    ctx.arcTo(x + barW, y, x + barW, y + radius, radius);
+    ctx.arcTo(x + barW, y + barH, x + barW - radius, y + barH, radius);
+    ctx.arcTo(x, y + barH, x, y + barH - radius, radius);
+    ctx.arcTo(x, y, x + radius, y, radius);
+    ctx.closePath();
+    ctx.fill();
+    ctx.stroke();
+
+    // label
+    ctx.fillStyle = 'rgba(155,186,205,0.9)';
+    ctx.font = '11px Arial';
+    ctx.textAlign = 'center';
+    const short = (label || '').slice(5); // YYYY-MM-DD -> MM-DD-ish
+    ctx.fillText(short, x + barW / 2, h - 2);
+    ctx.fillStyle = color;
+  });
+}
+
+function drawLineChart(canvasId, labels, series, options = {}) {
+  const canvas = document.getElementById(canvasId);
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const w = canvas.width = canvas.clientWidth;
+  const h = canvas.height = Math.floor(canvas.clientHeight);
+
+  ctx.clearRect(0, 0, w, h);
+  const pad = 14;
+  const allVals = series.flatMap(s => s.values || []);
+  const maxVal = Math.max(...allVals, 1);
+  const gridLines = 4;
+
+  // grid
+  ctx.strokeStyle = 'rgba(255,255,255,0.08)';
+  ctx.lineWidth = 1;
+  for (let i = 0; i <= gridLines; i++) {
+    const y = pad + (h - pad * 2) * (i / gridLines);
+    ctx.beginPath();
+    ctx.moveTo(pad, y);
+    ctx.lineTo(w - pad, y);
+    ctx.stroke();
+  }
+
+  const plotW = w - pad * 2;
+  const plotH = h - pad * 2;
+  const n = Math.max(labels.length, 1);
+  const stepX = plotW / (n - 1 || 1);
+
+  series.forEach((s) => {
+    const color = s.color;
+    const values = s.values || [];
+
+    // line
+    ctx.strokeStyle = color;
+    ctx.fillStyle = color;
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+
+    values.forEach((v, i) => {
+      const x = pad + i * stepX;
+      const y = h - pad - plotH * (v / maxVal);
+      if (i === 0) ctx.moveTo(x, y);
+      else ctx.lineTo(x, y);
+    });
+
+    ctx.stroke();
+
+    // points
+    values.forEach((v, i) => {
+      const x = pad + i * stepX;
+      const y = h - pad - plotH * (v / maxVal);
+      ctx.beginPath();
+      ctx.arc(x, y, 3.5, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = 'rgba(255,255,255,0.25)';
+      ctx.lineWidth = 1;
+      ctx.stroke();
+      ctx.strokeStyle = color;
+    });
+  });
+
+  // x labels (sparse)
+  ctx.fillStyle = 'rgba(155,186,205,0.9)';
+  ctx.font = '11px Arial';
+  ctx.textAlign = 'center';
+  labels.forEach((label, i) => {
+    if (i % 1 !== 0) return;
+    const x = pad + i * stepX;
+    const short = (label || '').slice(5);
+    ctx.fillText(short, x, h - 2);
+  });
+}
+
 async function loadAdminStats() {
   console.log('Loading admin stats...');
   try {
     const res = await apiFetch('/auth/admin-stats');
-    console.log('Admin stats response:', res);
+
+    // In parallel load chart data
+    const [newUsersRes, noteActivityRes, taskProgressRes] = await Promise.all([
+      apiFetch('/auth/analytics/new-users?days=7'),
+      apiFetch('/auth/analytics/note-activity?days=7'),
+      apiFetch('/auth/analytics/task-progress?days=7')
+    ]);
+
+    if (newUsersRes?.success) {
+      const points = newUsersRes.data?.points || [];
+      const labels = points.map(p => p.date);
+      const values = points.map(p => p.count);
+      drawBars('chart-new-users', labels, values, { color: 'rgba(102,255,242,0.95)' });
+      const last = values[values.length - 1] ?? 0;
+      const total = values.reduce((a, b) => a + (b || 0), 0);
+      const elTotal = document.getElementById('admin-new-users-total');
+      const elLast = document.getElementById('admin-new-users-last');
+      if (elTotal) elTotal.textContent = String(total);
+      if (elLast) elLast.textContent = String(last);
+    }
+
+    if (noteActivityRes?.success) {
+      const points = noteActivityRes.data?.points || [];
+      const labels = points.map(p => p.date);
+      const created = points.map(p => p.created);
+      const updated = points.map(p => p.updated);
+      drawLineChart('chart-note-activity', labels, [
+        { name: 'created', color: 'rgba(102,255,242,0.95)', values: created },
+        { name: 'updated', color: 'rgba(167,139,250,0.95)', values: updated }
+      ]);
+    }
+
+    if (taskProgressRes?.success) {
+      const points = taskProgressRes.data?.points || [];
+      const labels = points.map(p => p.date);
+      const completion = points.map(p => p.completion_pct);
+      drawBars('chart-task-progress', labels, completion, { color: 'rgba(167,139,250,0.95)' });
+      const lastPct = completion[completion.length - 1] ?? 0;
+      const el = document.getElementById('admin-task-progress-last');
+      if (el) el.textContent = `Last day: ${lastPct}%`;
+    }
 
     if (!res.success) {
       console.error('Admin stats load failed:', res.message);
       return;
     }
 
-    // In admin panel, always show values based on the currently logged-in admin.
-    // The backend /auth/admin-stats endpoint should already be scoped to the user.
     document.getElementById('admin-total-users').textContent = res.data.total_users ?? 0;
     document.getElementById('admin-active-users').textContent = res.data.active_users ?? 0;
     document.getElementById('admin-total-notes').textContent = res.data.total_notes ?? 0;
@@ -221,7 +406,6 @@ async function loadAdminStats() {
     console.error('Error loading admin stats:', error);
   }
 }
-
 
 async function loadAdminUsers() {
   console.log('Loading admin users...');

@@ -31,10 +31,16 @@
     </section>
 
     <div class="card admin-section">
-      <h3>Moderation UI (placeholder)</h3>
-      <p class="section-intro">Backend moderation endpoints are not yet connected. This confirms the quick-link navigation works.</p>
+      <h3>Pending Files</h3>
+      <p class="section-intro">Review and approve/reject files waiting for moderation.</p>
+
       <div class="admin-action-grid" style="margin-top:1rem;">
+        <button class="btn" type="button" id="refresh-files-btn">Refresh</button>
         <button class="btn btn-secondary" type="button" onclick="window.location.href='admin-dashboard.html#content'">Back to Content</button>
+      </div>
+
+      <div style="margin-top:1rem;" id="pending-files-container">
+        <p class="section-intro">Loading pending files...</p>
       </div>
     </div>
   </main>
@@ -44,6 +50,7 @@
 <script>
   requireAuth();
   initDarkMode();
+
   const logout = document.getElementById('logout-sidebar');
   if (logout) {
     logout.onclick = (e) => {
@@ -53,6 +60,109 @@
       window.location.href = 'admin-login.html';
     };
   }
+
+  function fileMetaLine(file) {
+    const created = file.created_at ? new Date(file.created_at).toLocaleString() : '—';
+    const filename = file.filename || file.name || file.title || 'Untitled File';
+    const status = file.moderation_status ? ` · ${file.moderation_status}` : '';
+    return { created, filename, status };
+  }
+
+  function pendingFilesCard(file) {
+    const meta = fileMetaLine(file);
+    return `
+      <div class="card" style="margin-bottom:1rem; padding:1rem 1.1rem; border-left:4px solid var(--primary);">
+        <div style="display:flex; justify-content:space-between; gap:1rem; align-items:flex-start;">
+          <div>
+            <div style="font-weight:800; margin-bottom:0.25rem;">${meta.filename}</div>
+            <div style="font-size:0.82rem; color:var(--text-muted);">Updated: ${meta.created}${meta.status}</div>
+          </div>
+          <div style="display:flex; flex-direction:column; gap:0.5rem;">
+            <button class="btn" type="button" onclick="approveFile('${file.id}')">Approve</button>
+            <button class="btn btn-secondary" type="button" onclick="rejectFile('${file.id}')">Reject</button>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  async function loadPendingFiles() {
+    const container = document.getElementById('pending-files-container');
+    const refreshBtn = document.getElementById('refresh-files-btn');
+    if (!container) return;
+
+    if (refreshBtn) {
+      refreshBtn.disabled = true;
+      refreshBtn.textContent = 'Refreshing...';
+    }
+
+    container.innerHTML = '<p class="section-intro">Loading pending files...</p>';
+
+    const res = await apiFetch('/auth/moderation/files', 'GET');
+
+    if (refreshBtn) {
+      refreshBtn.disabled = false;
+      refreshBtn.textContent = 'Refresh';
+    }
+
+    if (!res || !res.success) {
+      container.innerHTML = `<p class="section-intro" style="color: var(--text-muted);">Unable to load pending files.</p>`;
+      return;
+    }
+
+    const items = res.data?.items || [];
+    if (items.length === 0) {
+      container.innerHTML = '<p class="section-intro">No pending files.</p>';
+      return;
+    }
+
+    container.innerHTML = items.map(pendingFilesCard).join('');
+  }
+
+  window.approveFile = async function(fileId) {
+    const res = await apiFetch(`/auth/moderation/files/${fileId}/approve`, 'POST');
+
+    if (!res || !res.success) {
+      alert(res?.message || 'Unable to approve file.');
+      return;
+    }
+    await loadPendingFiles();
+  };
+
+  window.rejectFile = async function(fileId) {
+    const res = await apiFetch(`/auth/moderation/files/${fileId}/reject`, 'POST');
+
+    if (!res || !res.success) {
+      alert(res?.message || 'Unable to reject file.');
+      return;
+    }
+    await loadPendingFiles();
+  };
+
+  // Basic view: attempt to open the file details URL if backend serves it.
+  // If not available, fall back to opening the raw file (if the file doc includes a url/path).
+  window.viewFile = async function(fileId) {
+    const file = null;
+    try {
+      // Best-effort: look for a common file details endpoint.
+      // Current codebase exposes file moderation endpoints only; so this is optional.
+      const res = await apiFetch(`/files/${fileId}`, 'GET');
+      if (res && res.success && (res.data?.url || res.data?.path)) {
+        const url = res.data.url || res.data.path;
+        window.open(url, '_blank');
+        return;
+      }
+    } catch (e) {}
+
+    // Fallback: open an admin-friendly route if you have one.
+    // (No-op if not implemented.)
+    window.open(`/files/${fileId}`, '_blank');
+  };
+
+  const refreshBtn = document.getElementById('refresh-files-btn');
+  if (refreshBtn) refreshBtn.onclick = loadPendingFiles;
+
+  loadPendingFiles();
 </script>
 </body>
 </html>
