@@ -19,8 +19,8 @@
       <a href="#content">Content</a>
       <a href="#analytics">Analytics</a>
       <a href="#settings">Settings</a>
-      <a href="admin-login.html" id="logout-sidebar">Logout</a>
     </nav>
+
   </aside>
 
   <main class="main-content">
@@ -513,12 +513,7 @@ setInterval(() => {
   loadAdminStats();
 }, 30000);
 
-document.getElementById('logout-sidebar').onclick = (e) => {
-  e.preventDefault();
-  localStorage.removeItem('token');
-  localStorage.removeItem('adminUser');
-  window.location.href = 'admin-login.html';
-};
+
 
 const sectionMeta = {
   dashboard: {

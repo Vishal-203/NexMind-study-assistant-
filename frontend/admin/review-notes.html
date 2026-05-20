@@ -19,8 +19,8 @@
       <a href="admin-dashboard.html#content" class="active">Content</a>
       <a href="admin-dashboard.html#analytics">Analytics</a>
       <a href="admin-dashboard.html#settings">Settings</a>
-      <a href="admin-login.html" id="logout-sidebar">Logout</a>
     </nav>
+
   </aside>
 
   <main class="main-content">
@@ -52,15 +52,7 @@
   requireAuth();
   initDarkMode();
 
-  const logout = document.getElementById('logout-sidebar');
-  if (logout) {
-    logout.onclick = (e) => {
-      e.preventDefault();
-      localStorage.removeItem('token');
-      localStorage.removeItem('adminUser');
-      window.location.href = 'admin-login.html';
-    };
-  }
+
 
   function pendingNotesCard(note) {
     const created = note.created_at ? new Date(note.created_at).toLocaleString() : '—';

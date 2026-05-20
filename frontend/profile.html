@@ -9,20 +9,36 @@
 <div class="app-container">
   <aside class="sidebar">
     <div class="sidebar-logo" aria-label="AI Study Assistant">
-<img class="sidebar-logo__img brand-logo--neon" src="assets/study-logo-theme.png" alt="" aria-hidden="true" />
-      <span class="sidebar-logo__text">AI-STUDY ASSISTANT</span>
+      <a href="dashboard.html" class="sidebar-logo__link" aria-label="Go to dashboard" style="display:flex; align-items:center; gap:0.65rem; text-decoration:none; color:inherit;">
+        <img class="sidebar-logo__img brand-logo--neon" src="assets/study-logo-theme.png" alt="" aria-hidden="true" />
+        <span class="sidebar-logo__text">AI-STUDY ASSISTANT</span>
+      </a>
     </div>
-<nav class="nav-links">
-      <a href="dashboard.html">Dashboard</a>
+
+
+    <nav class="nav-links">
+      <a href="dashboard.html" class="active">Dashboard</a>
+
       <a href="notebook.html">Notes</a>
       <a href="ai_assistant.html">AI Assistant</a>
       <a href="planner.html">Tasks</a>
-      <a href="profile.html" class="active">Profile</a>
-      <a href="#" id="logout-sidebar">Logout</a>
+
     </nav>
+
   </aside>
 
+  <button class="profile-float-btn" id="profile-float-btn" type="button" onclick="window.location.href='profile.html'">
+    <span class="profile-float-btn__icon" aria-hidden="true">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <path d="M12 12c2.485 0 4.5-2.239 4.5-5S14.485 2 12 2 7.5 4.239 7.5 7s2.015 5 4.5 5Z" fill="currentColor"/>
+        <path d="M4 22c0-4.418 3.582-8 8-8s8 3.582 8 8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+      </svg>
+    </span>
+    <span class="profile-float-btn__label">Profile</span>
+  </button>
+
   <main class="main-content">
+
     <section class="page-hero">
       <p class="auth-kicker">Identity & Access</p>
       <h1>Profile Control</h1>
@@ -67,14 +83,21 @@
         <input id="confirm-password" class="input-field" type="password" placeholder="Confirm Protocol">
       </div>
       <button class="btn" id="change-password-btn">Execute Protocol Update</button>
+
     </div>
+
+    <div style="display:flex; justify-content:center; width: 100%; margin-top: 1rem;">
+      <button class="btn btn-muted" type="button" id="logout-btn" style="width: min(220px, 70%); padding: 0.45rem 0.85rem; font-size: 0.85rem;">Log out</button>
+    </div>
+
   </main>
 </div>
 
-<button class="ask-ai-btn" onclick="openChatWidget()">Ask AI</button>
-
 <!-- Chat Widget -->
 <div id="chat-widget" class="chat-widget">
+
+
+
   <div class="chat-widget-header">
     <div class="chat-widget-title">AI Assistant</div>
     <div class="chat-widget-controls">
@@ -114,12 +137,7 @@ initDarkMode();
 
 
 
-document.getElementById('logout-sidebar').onclick = (e) => {
-  e.preventDefault();
-  clearToken();
-  localStorage.removeItem('user');
-  window.location = 'index.html';
-};
+
 
 const user = JSON.parse(localStorage.getItem('user') || '{}');
 
@@ -177,6 +195,17 @@ document.getElementById('change-password-btn').onclick = async () => {
 
 loadProfile();
 loadStats();
+
+  // Log out: clear client token and redirect to landing/login
+  const logoutBtn = document.getElementById('logout-btn');
+  if (logoutBtn) {
+    logoutBtn.onclick = () => {
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      window.location.href = 'index.html';
+    };
+  }
 </script>
 </body>
 </html>
+

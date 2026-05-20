@@ -19,9 +19,8 @@
       <a href="ai_assistant.html">AI Assistant</a>
       <a href="planner.html">Tasks</a>
 
-      <a href="profile.html">Profile</a>
 
-      <a href="#" id="logout-sidebar">Logout</a>
+
     </nav>
   </aside>
 
@@ -95,7 +94,18 @@
 
 
 
+<button class="profile-float-btn" type="button" onclick="window.location.href='profile.html'">
+  <span class="profile-float-btn__icon" aria-hidden="true">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <path d="M12 12c2.485 0 4.5-2.239 4.5-5S14.485 2 12 2 7.5 4.239 7.5 7s2.015 5 4.5 5Z" fill="currentColor"/>
+      <path d="M4 22c0-4.418 3.582-8 8-8s8 3.582 8 8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+    </svg>
+  </span>
+  <span class="profile-float-btn__label">Profile</span>
+</button>
+
 <!-- Chat Widget -->
+
 <div id="chat-widget" class="chat-widget">
   <div class="chat-widget-header">
     <div class="chat-widget-title">AI Assistant</div>
@@ -118,12 +128,7 @@
 requireAuth();
 initDarkMode();
 
-document.getElementById('logout-sidebar').onclick = (e) => {
-  e.preventDefault();
-  clearToken();
-  localStorage.removeItem('user');
-  window.location = 'index.html';
-};
+
 
 async function loadStats() {
   const res = await apiFetch('/user/stats');

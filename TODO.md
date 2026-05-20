@@ -1,20 +1,8 @@
-# Admin Control Center - Analytics Visualization
+- [x] Remove Logout button from all user/admin pages
 
-## Plan
-- Add backend time-series endpoints for:
-  - New users (signups per day for last 7 days)
-  - Note activity (created+updated per day for last 7 days)
-  - Task progress (completion % per day for last 7 days)
-- Add frontend data visualization in `frontend/admin/admin-dashboard.html`.
+- [x] Add Profile floating button to profile.html
+- [x] Add required CSS for floating button
+- [x] Ensure no logout-sidebar references remain
 
-## Backend steps
-- [ ] Implement endpoints in `backend/controllers/admin_controller.py`.
-- [ ] Wire routes in `backend/routes/admin_auth_routes.py`.
-
-## Frontend steps
-- [ ] Add chart UI sections (simple SVG/canvas) in `frontend/admin/admin-dashboard.html`.
-- [ ] Fetch chart data and render charts in the dashboard script.
-
-## Testing
-- [ ] Load admin dashboard and verify charts render and update on refresh.
+- [ ] Smoke test pages in browser
 
