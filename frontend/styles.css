@@ -673,6 +673,15 @@ h3 { font-size: 1.25rem; }
   border-color: rgba(255, 255, 255, 0.32);
 }
 
+/* Logout button alignment helper */
+.logout-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+
 /* Form Fields */
 .input-field, textarea, select {
   width: 100%;
@@ -1817,11 +1826,12 @@ html[data-theme="light"] body {
   pointer-events: none;
 }
 
-/* Profile floating button (bottom-left on profile page) */
+/* Profile floating button */
 .profile-float-btn {
   position: fixed;
   left: 1.25rem;
   bottom: 1.25rem;
+
   z-index: 250;
   display: inline-flex;
   align-items: center;

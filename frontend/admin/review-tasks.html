@@ -10,16 +10,18 @@
 <div class="app-container">
   <aside class="sidebar">
 <div class="sidebar-logo" aria-label="AI Study Assistant">
-      <img class="sidebar-logo__img brand-logo--neon brand-logo--glass" src="../assets/ai-geom-neon-logo.svg" alt="" aria-hidden="true" />
-      <span class="sidebar-logo__text">AI-STUDY ASSISTANT</span>
+      <img class="sidebar-logo__img brand-logo--neon" src="../assets/study-logo-theme.png" alt="" aria-hidden="true" />
+<span class="sidebar-logo__text">NexMind</span>
     </div>
     <nav class="nav-links sidebar-nav">
       <a href="admin-dashboard.html">Dashboard</a>
       <a href="admin-dashboard.html#users">Users</a>
       <a href="admin-dashboard.html#content" class="active">Content</a>
       <a href="admin-dashboard.html#analytics">Analytics</a>
-      <a href="admin-dashboard.html#settings">Settings</a>
+      <a href="admin-profile.html">Profile</a>
+
     </nav>
+
 
   </aside>
 
@@ -40,6 +42,16 @@
   </main>
 </div>
 
+<button class="profile-float-btn" type="button" onclick="window.location.href='admin-profile.html'">
+  <span class="profile-float-btn__icon" aria-hidden="true">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <path d="M12 12c2.485 0 4.5-2.239 4.5-5S14.485 2 12 2 7.5 4.239 7.5 7s2.015 5 4.5 5Z" fill="currentColor"/>
+      <path d="M4 22c0-4.418 3.582-8 8-8s8 3.582 8 8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+    </svg>
+  </span>
+  <span class="profile-float-btn__label">Profile</span>
+</button>
+
 <script src="../app.js"></script>
 <script>
   requireAuth();
@@ -48,4 +60,5 @@
 </script>
 </body>
 </html>
+
 

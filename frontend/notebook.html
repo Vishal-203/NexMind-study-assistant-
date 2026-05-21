@@ -10,7 +10,7 @@
   <aside class="sidebar">
     <div class="sidebar-logo" aria-label="AI Study Assistant">
 <img class="sidebar-logo__img brand-logo--neon" src="assets/study-logo-theme.png" alt="" aria-hidden="true" />
-      <span class="sidebar-logo__text">AI-STUDY ASSISTANT</span>
+<span class="sidebar-logo__text">NexMind</span>
     </div>
 <nav class="nav-links">
       <a href="dashboard.html">Dashboard</a>
@@ -81,11 +81,7 @@ Access your stored information notes.
       </div>
     </div>
 
-    <div class="card">
-      <h3>Shared Notes <span id="shared-count" style="font-size:0.8rem; color:var(--text-muted);">(0)</span></h3>
-      <p class="section-intro">Information shared by other network participants.</p>
-      <ul id="shared-note-list" style="max-height:300px; overflow-y:auto; list-style: none;"></ul>
-    </div>
+
   </main>
 </div>
 
@@ -225,9 +221,8 @@ async function loadNotes(filter=''){
         <div style="display:flex; gap:0.5rem; margin-top:0.75rem; flex-wrap:wrap;">
           <button class="btn btn-secondary" style="padding: 0.3rem 0.8rem; font-size: 0.7rem;" onclick="editNote('${n.id}')">Edit</button>
           <button class="btn btn-secondary" style="padding: 0.3rem 0.8rem; font-size: 0.7rem;" onclick="exportPDF('${n.id}')">PDF</button>
-          <button class="btn btn-secondary" style="padding: 0.3rem 0.8rem; font-size: 0.7rem;" onclick="openShareModal('${n.id}')">Share</button>
-          <button class="btn btn-muted" style="padding: 0.3rem 0.8rem; font-size: 0.7rem;" onclick="makeFlashcards('${n.id}')">Make Flashcards</button>
-          <button class="btn btn-secondary" style="padding: 0.3rem 0.8rem; font-size: 0.7rem;" onclick="openStudy('${n.id}')">Study</button>
+
+
           <button class="btn btn-muted" style="padding: 0.3rem 0.8rem; font-size: 0.7rem;" onclick="deleteNote('${n.id}')">Delete</button>
         </div>
       `;
@@ -581,8 +576,10 @@ window.exportPDF = async(id) => {
 
 
 // =============================
-// Flashcards (Last-minute SRS)
+// Flashcards removed from UI
+// (kept JS code for now)
 // =============================
+
 
 let currentStudyNoteId = null;
 let currentStudyCardIndex = 0;

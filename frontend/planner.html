@@ -10,7 +10,7 @@
   <aside class="sidebar">
     <div class="sidebar-logo" aria-label="AI Study Assistant">
 <img class="sidebar-logo__img brand-logo--neon" src="assets/study-logo-theme.png" alt="" aria-hidden="true" />
-      <span class="sidebar-logo__text">AI-STUDY ASSISTANT</span>
+<span class="sidebar-logo__text">NexMind</span>
     </div>
 <nav class="nav-links">
       <a href="dashboard.html">Dashboard</a>
@@ -67,21 +67,7 @@
   <span class="profile-float-btn__label">Profile</span>
 </button>
 
-<!-- Chat Widget -->
-<div id="chat-widget"
-  <div class="chat-widget-header">
-    <div class="chat-widget-title">AI Assistant</div>
-    <div class="chat-widget-controls">
-      <button onclick="minimizeChatWidget()">_</button>
-      <button onclick="closeChatWidget()">×</button>
-    </div>
-  </div>
-  <div id="chat-messages" class="chat-messages"></div>
-  <div class="chat-input-area">
-    <input type="text" id="chat-input" placeholder="Type a message..." />
-    <button id="chat-send-btn" onclick="sendChatMessage()">Send</button>
-  </div>
-</div>
+
 
 <script src="app.js"></script>
 <script src="neural-bg.js"></script>
@@ -172,6 +158,10 @@ document.getElementById('add-task') && (document.getElementById('add-task').oncl
     const titleEl = document.getElementById('task-title');
     const deadlineEl = document.getElementById('task-deadline');
     const priorityEl = document.getElementById('task-priority');
+
+
+    // NOTE: planner UI currently renders tasks as cards (not a table), so there is no “unstructured” column to remove.
+
 
     if (!titleEl || !deadlineEl || !priorityEl) {
       showErr('Client error: task form elements are missing from the page.');
