@@ -65,6 +65,7 @@
 
 <script src="app.js"></script>
 
+  <script src="neural-bg.js"></script>
   <script src="chat-widget.js"></script>
   <script>
     // Ensure auth + theme
@@ -161,12 +162,12 @@
 
     clearBtn.addEventListener('click', () => {
       messagesEl.innerHTML = '';
-      addMessage('ai', 'How can I help you today?');
+      addMessage('ai', 'Hi! Welcome to your study chat. How can I help you today?');
       inputEl.focus();
     });
 
     // Initial greeting
-    addMessage('ai', 'How can I help you today?');
+    addMessage('ai', 'Hi! Welcome to your study chat. How can I help you today?');
   </script>
 </body>
 </html>
