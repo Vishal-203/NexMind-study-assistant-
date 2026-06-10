@@ -1,5 +1,6 @@
 from flask import request
 from flask_jwt_extended import jwt_required, get_jwt_identity
+from datetime import datetime, timedelta
 from utils.helpers import check_password, hash_password, parse_object_id, resp
 
 
@@ -80,12 +81,25 @@ def get_user_stats(app):
     tasks_count = app.mongo.db.tasks.count_documents({'user_id': user_id})
     completed_tasks = app.mongo.db.tasks.count_documents({'user_id': user_id, 'status': 'completed'})
     pending_tasks = tasks_count - completed_tasks
-    
+
+    completed_dates = set()
+    for task in app.mongo.db.tasks.find({'user_id': user_id, 'status': 'completed'}, {'created_at': 1}):
+        created_at = task.get('created_at')
+        if isinstance(created_at, datetime):
+            completed_dates.add(created_at.date())
+
+    streak = 0
+    today = datetime.utcnow().date()
+    while today in completed_dates:
+        streak += 1
+        today -= timedelta(days=1)
+
     stats = {
         'notes': notes_count,
         'total_tasks': tasks_count,
         'completed_tasks': completed_tasks,
-        'pending_tasks': pending_tasks
+        'pending_tasks': pending_tasks,
+        'focus_streak': streak
     }
     
     return resp(True, 'Stats fetched', stats)

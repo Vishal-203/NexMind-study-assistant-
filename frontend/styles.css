@@ -432,6 +432,11 @@ h3 { font-size: 1.25rem; }
   line-height: 1.45;
 }
 
+.dashboard-page .app-container {
+  min-height: 100vh;
+  margin-top: 0;
+}
+
 .dashboard-page .main-content {
   padding-top: 1.5rem;
   padding-bottom: 1.5rem;

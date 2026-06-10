@@ -10,26 +10,6 @@
 </head>
 
 <body class="dashboard-page">
-  <!-- Top Navigation -->
-  <header class="top-nav sticky-top">
-    <div class="top-nav__content">
-      <div class="top-nav__left">
-        <h2 class="page-title">Dashboard</h2>
-      </div>
-      <div class="top-nav__center">
-        <input type="text" class="search-input" placeholder="Search notes, tasks, concepts..." aria-label="Global search" />
-      </div>
-      <div class="top-nav__right">
-        <button aria-label="Notifications" class="icon-btn">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
-        </button>
-        <button aria-label="Settings" class="icon-btn">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 1v6m0 6v6M4.22 4.22l4.24 4.24m5.08 5.08l4.24 4.24M1 12h6m6 0h6M4.22 19.78l4.24-4.24m5.08-5.08l4.24-4.24"/></svg>
-        </button>
-        <button class="avatar-btn" aria-label="Profile">V</button>
-      </div>
-    </div>
-  </header>
   <div class="app-container">
     <!-- Sidebar -->
     <aside id="sidebar" class="sidebar">
@@ -66,7 +46,7 @@
         <section class="hero-section grid-col-full">
           <div class="hero-left">
             <p class="hero-kicker">Study Dashboard</p>
-            <h1 class="hero-title">Welcome back, Vishal</h1>
+            <h1 id="dashboard-welcome" class="hero-title">Welcome back, Vishal</h1>
             <p class="hero-subtitle">Your AI Assistant is ready. Check your momentum and pick the next best action.</p>
           </div>
           <div class="hero-right">
@@ -76,7 +56,7 @@
               </div>
               <div>
                 <div class="stat-badge__label">Study Streak</div>
-                <div class="stat-badge__value">12 days</div>
+                <div id="hero-streak-value" class="stat-badge__value">12 days</div>
               </div>
             </div>
             <div class="stat-badge">
@@ -85,21 +65,21 @@
               </div>
               <div>
                 <div class="stat-badge__label">Notes</div>
-                <div class="stat-badge__value">9</div>
+                <div id="hero-notes-value" class="stat-badge__value">9</div>
               </div>
             </div>
           </div>
         </section>
 
         <!-- Quick Stats -->
-        <div class="quick-stats grid-col-full">
+        <div id="quick-stats" class="quick-stats grid-col-full">
           <div class="stat-card">
             <div class="stat-icon">
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
             </div>
             <div class="stat-info">
               <div class="stat-label">Notes</div>
-              <div class="stat-value">9</div>
+              <div id="notes-value" class="stat-value">9</div>
             </div>
           </div>
           <div class="stat-card">
@@ -108,7 +88,7 @@
             </div>
             <div class="stat-info">
               <div class="stat-label">Completed</div>
-              <div class="stat-value">42</div>
+              <div id="completed-value" class="stat-value">42</div>
             </div>
           </div>
           <div class="stat-card">
@@ -117,7 +97,7 @@
             </div>
             <div class="stat-info">
               <div class="stat-label">Pending</div>
-              <div class="stat-value">3</div>
+              <div id="pending-value" class="stat-value">3</div>
             </div>
           </div>
           <div class="stat-card">
@@ -126,7 +106,7 @@
             </div>
             <div class="stat-info">
               <div class="stat-label">Focus Streak</div>
-              <div class="stat-value">12d</div>
+              <div id="focus-streak-value" class="stat-value">12d</div>
             </div>
           </div>
         </div>
@@ -135,18 +115,18 @@
         <div class="card-section grid-col-main">
           <div class="card-header">
             <h3 class="card-title">AI Recommendation</h3>
-            <div class="priority-badge">High</div>
+            <div id="recommendation-priority" class="priority-badge">High</div>
           </div>
           <p class="card-subtitle">Next best action to keep your momentum.</p>
 
           <div class="ai-match-grid">
             <div>
               <div class="field-label">Next Best Action</div>
-              <div class="field-value">Complete Project Report</div>
+              <div id="recommendation-action" class="field-value">Loading task…</div>
             </div>
             <div>
               <div class="field-label">Estimated Time</div>
-              <div class="field-value">45 minutes</div>
+              <div id="recommendation-estimate" class="field-value">—</div>
             </div>
           </div>
 
@@ -162,34 +142,8 @@
             <h3 class="card-title">Active Tasks</h3>
             <a href="planner.html" class="link-small">Manage</a>
           </div>
-          <div class="tasks-list">
-            <div class="task-item">
-              <div class="task-title">Project Report</div>
-              <div class="task-progress">
-                <div class="progress-bar">
-                  <div class="progress-fill" style="width:75%"></div>
-                </div>
-                <div class="progress-text">75%</div>
-              </div>
-            </div>
-            <div class="task-item">
-              <div class="task-title">Java Assignment</div>
-              <div class="task-progress">
-                <div class="progress-bar">
-                  <div class="progress-fill" style="width:40%"></div>
-                </div>
-                <div class="progress-text">40%</div>
-              </div>
-            </div>
-            <div class="task-item">
-              <div class="task-title">DBMS Notes</div>
-              <div class="task-progress">
-                <div class="progress-bar">
-                  <div class="progress-fill" style="width:15%"></div>
-                </div>
-                <div class="progress-text">15%</div>
-              </div>
-            </div>
+          <div id="active-tasks-list" class="tasks-list">
+            <p class="section-intro">Loading your active tasks...</p>
           </div>
         </div>
 
@@ -280,21 +234,98 @@ initDarkMode();
 
 async function loadStats() {
   const res = await apiFetch('/user/stats');
-  if(res.success) {
+  if (res.success) {
     const s = res.data;
-    document.getElementById('quick-stats').innerHTML = `
-      <div class="grid-2">
-        <div style="padding: 0.65rem 0.8rem; border-left: 2px solid var(--primary);">
-          <span style="display: block; font-size: 0.8rem; color: var(--text-muted);">NOTES</span>
-          <span style="font-size: 1.5rem; font-weight: 800; color: var(--primary);">${s.notes}</span>
-        </div>
-        <div style="padding: 0.65rem 0.8rem; border-left: 2px solid var(--primary);">
-          <span style="display: block; font-size: 0.8rem; color: var(--text-muted);">PENDING</span>
-          <span style="font-size: 1.5rem; font-weight: 800; color: var(--primary);">${s.pending_tasks}</span>
-        </div>
-      </div>
-    `;
+    const notesEl = document.getElementById('notes-value');
+    const completedEl = document.getElementById('completed-value');
+    const pendingEl = document.getElementById('pending-value');
+    const focusEl = document.getElementById('focus-streak-value');
+    const heroNotesEl = document.getElementById('hero-notes-value');
+    const heroStreakEl = document.getElementById('hero-streak-value');
+
+    if (notesEl) notesEl.textContent = s.notes ?? '0';
+    if (completedEl) completedEl.textContent = s.completed_tasks ?? '0';
+    if (pendingEl) pendingEl.textContent = s.pending_tasks ?? '0';
+    if (focusEl) focusEl.textContent = s.focus_streak !== undefined ? `${s.focus_streak}d` : '—';
+    if (heroNotesEl) heroNotesEl.textContent = s.notes ?? '0';
+    if (heroStreakEl) heroStreakEl.textContent = s.focus_streak !== undefined ? `${s.focus_streak} days` : '—';
   }
+}
+
+function estimateTaskTime(priority) {
+  const normalized = String(priority || 'medium').toLowerCase();
+  if (normalized === 'high') return '30 minutes';
+  if (normalized === 'low') return '60 minutes';
+  return '45 minutes';
+}
+
+function formatPriorityLabel(priority) {
+  const normalized = String(priority || 'medium').trim().toLowerCase();
+  return normalized.charAt(0).toUpperCase() + normalized.slice(1);
+}
+
+function computeTaskProgress(task) {
+  if (!task || task.status === 'completed') return 100;
+
+  const now = Date.now();
+  const createdAt = task.created_at ? Date.parse(task.created_at) : null;
+  const deadlineAt = task.deadline ? Date.parse(task.deadline) : null;
+  let percent = 20;
+
+  if (createdAt && deadlineAt && deadlineAt > createdAt) {
+    const total = deadlineAt - createdAt;
+    const elapsed = Math.max(0, now - createdAt);
+    percent = Math.round((elapsed / total) * 100);
+  } else if (deadlineAt) {
+    const daysLeft = Math.max(0, (deadlineAt - now) / 86400000);
+    percent = Math.round(Math.max(10, Math.min(90, 100 - daysLeft * 10)));
+  }
+
+  return Math.min(100, Math.max(0, percent));
+}
+
+function renderTaskItem(task) {
+  const progress = computeTaskProgress(task);
+  const dueLabel = task.deadline ? new Date(task.deadline).toLocaleDateString() : 'No deadline';
+  return `
+    <div class="task-item">
+      <div class="task-title">${task.title || 'Untitled task'}</div>
+      <div class="task-progress">
+        <div class="progress-bar">
+          <div class="progress-fill" style="width:${progress}%"></div>
+        </div>
+        <div class="progress-text">${progress}%</div>
+      </div>
+      <div class="task-meta" style="margin-top:0.55rem; font-size:0.85rem; color:rgba(155,186,205,0.75);">Due ${dueLabel}</div>
+    </div>
+  `;
+}
+
+async function loadDashboardTasks() {
+  const taskRes = await apiFetch('/tasks?status=pending&limit=5');
+  const list = document.getElementById('active-tasks-list');
+  const actionEl = document.getElementById('recommendation-action');
+  const estimateEl = document.getElementById('recommendation-estimate');
+  const priorityEl = document.getElementById('recommendation-priority');
+
+  if (!list) return;
+
+  if (taskRes.success && Array.isArray(taskRes.data?.items) && taskRes.data.items.length > 0) {
+    const tasks = taskRes.data.items.filter(t => t.status !== 'completed');
+    if (tasks.length > 0) {
+      list.innerHTML = tasks.slice(0, 3).map(renderTaskItem).join('');
+      const nextTask = tasks[0];
+      if (actionEl) actionEl.textContent = nextTask.title || 'Continue task';
+      if (estimateEl) estimateEl.textContent = estimateTaskTime(nextTask.priority);
+      if (priorityEl) priorityEl.textContent = formatPriorityLabel(nextTask.priority);
+      return;
+    }
+  }
+
+  list.innerHTML = '<p class="section-intro">No active tasks found. <a href="planner.html" style="color: var(--primary);">Create a task</a> to get started.</p>';
+  if (actionEl) actionEl.textContent = 'No task available';
+  if (estimateEl) estimateEl.textContent = '—';
+  if (priorityEl) priorityEl.textContent = 'Medium';
 }
 
 async function loadRecentNotes() {
@@ -340,6 +371,9 @@ async function loadCheckpoint() {
   const checkpointNotePreview = document.getElementById('checkpoint-note-preview');
 
   const nextTask = taskRes.success && Array.isArray(taskRes.data?.items) && taskRes.data.items[0];
+
+  const hasCheckpointElements = checkpointTask || checkpointCount || checkpointNote || checkpointHeading || checkpointCopy || checkpointAction || checkpointNoteAction || checkpointDeadline || checkpointNotePreview;
+  if (!hasCheckpointElements) return;
   const latestNote = noteRes.success && Array.isArray(noteRes.data?.items) && noteRes.data.items[0];
   const pendingTasks = statsRes.success ? statsRes.data.pending_tasks : null;
 
@@ -385,6 +419,7 @@ async function applyDashboardWelcome() {
 
 loadStats();
 loadRecentNotes();
+loadDashboardTasks();
 loadCheckpoint();
 applyDashboardWelcome();
 </script>

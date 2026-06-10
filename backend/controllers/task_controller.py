@@ -9,10 +9,16 @@ def list_tasks(app):
     user_id = get_jwt_identity()
     page = request.args.get('page', default=1, type=int) or 1
     limit = request.args.get('limit', default=10, type=int) or 10
+    status = request.args.get('status', type=str)
     page = max(page, 1)
     limit = max(min(limit, 50), 1)
 
     query = {'user_id': user_id}
+    if status:
+        status = status.strip().lower()
+        if status in ['pending', 'completed']:
+            query['status'] = status
+
     total = app.mongo.db.tasks.count_documents(query)
     tasks = list(app.mongo.db.tasks.find(query)
                  .sort('deadline', 1)
