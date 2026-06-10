@@ -152,29 +152,14 @@
           <div class="card-header">
             <h3 class="card-title">Knowledge Hub</h3>
             <div class="knowledge-controls">
-              <input type="text" class="search-mini" placeholder="Search notes" />
-              <button class="btn-filter">Filter</button>
+              <input id="knowledge-search-input" type="text" class="search-mini" placeholder="Search notes" />
+              <button id="knowledge-filter-button" class="btn-filter">Filter</button>
             </div>
           </div>
 
-          <div class="knowledge-table">
+          <div id="knowledge-table" class="knowledge-table">
             <div class="knowledge-row">
-              <div class="knowledge-title">Java</div>
-              <div class="knowledge-topic">Inheritance</div>
-              <div class="knowledge-date">Feb 21, 2026</div>
-              <button class="btn-access">Open</button>
-            </div>
-            <div class="knowledge-row">
-              <div class="knowledge-title">Inheritance</div>
-              <div class="knowledge-topic">OOP Concepts</div>
-              <div class="knowledge-date">Feb 20, 2026</div>
-              <button class="btn-access">Open</button>
-            </div>
-            <div class="knowledge-row">
-              <div class="knowledge-title">DBMS</div>
-              <div class="knowledge-topic">SQL Queries</div>
-              <div class="knowledge-date">Feb 18, 2026</div>
-              <button class="btn-access">Open</button>
+              <div class="knowledge-title">Loading your notes…</div>
             </div>
           </div>
         </div>
@@ -328,6 +313,54 @@ async function loadDashboardTasks() {
   if (priorityEl) priorityEl.textContent = 'Medium';
 }
 
+function formatDateForHub(value) {
+  const date = value ? new Date(value) : null;
+  if (!date || Number.isNaN(date.getTime())) return 'Unknown';
+  return date.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
+}
+
+function renderKnowledgeRow(note) {
+  const dateLabel = formatDateForHub(note.updated_at || note.created_at);
+  return `
+    <div class="knowledge-row">
+      <div class="knowledge-title">${note.subject || 'Untitled'}</div>
+      <div class="knowledge-topic">${note.topic || 'General'}</div>
+      <div class="knowledge-date">${dateLabel}</div>
+      <a href="notebook.html" class="btn-access">Open</a>
+    </div>
+  `;
+}
+
+async function loadKnowledgeHub(searchQuery = '') {
+  const params = new URLSearchParams({ limit: 5 });
+  if (searchQuery) params.set('subject', searchQuery);
+
+  const res = await apiFetch(`/notes?${params.toString()}`);
+  const table = document.getElementById('knowledge-table');
+  if (!table) return;
+
+  if (res.success && Array.isArray(res.data?.items) && res.data.items.length > 0) {
+    table.innerHTML = res.data.items.map(renderKnowledgeRow).join('');
+    return;
+  }
+
+  table.innerHTML = '<div class="knowledge-row"><div class="knowledge-title">No notes found.</div><div class="knowledge-topic"><a href="notebook.html" style="color: var(--primary);">Create your first note</a></div></div>';
+}
+
+function initKnowledgeHubFilter() {
+  const filterButton = document.getElementById('knowledge-filter-button');
+  const searchInput = document.getElementById('knowledge-search-input');
+
+  if (!filterButton || !searchInput) return;
+
+  const runSearch = () => loadKnowledgeHub(searchInput.value.trim());
+
+  filterButton.addEventListener('click', runSearch);
+  searchInput.addEventListener('keypress', (event) => {
+    if (event.key === 'Enter') runSearch();
+  });
+}
+
 async function loadRecentNotes() {
   const res = await apiFetch('/notes');
   const container = document.getElementById('recent-notes-container');
@@ -420,6 +453,8 @@ async function applyDashboardWelcome() {
 loadStats();
 loadRecentNotes();
 loadDashboardTasks();
+loadKnowledgeHub();
+initKnowledgeHubFilter();
 loadCheckpoint();
 applyDashboardWelcome();
 </script>
