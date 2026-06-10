@@ -23,7 +23,6 @@
         <a href="notebook.html">Notes</a>
         <a href="ai_assistant.html">AI Assistant</a>
         <a href="planner.html">Tasks</a>
-        <a href="profile.html">Profile</a>
       </nav>
     </aside>
 
@@ -152,7 +151,7 @@
           <div class="card-header">
             <h3 class="card-title">Knowledge Hub</h3>
             <div class="knowledge-controls">
-              <input id="knowledge-search-input" type="text" class="search-mini" placeholder="Search notes" />
+              <input id="knowledge-search-input" type="text" class="search-mini search-mini-wide" placeholder="Search notes or topic" />
               <button id="knowledge-filter-button" class="btn-filter">Filter</button>
             </div>
           </div>
@@ -333,7 +332,7 @@ function renderKnowledgeRow(note) {
 
 async function loadKnowledgeHub(searchQuery = '') {
   const params = new URLSearchParams({ limit: 5 });
-  if (searchQuery) params.set('subject', searchQuery);
+  if (searchQuery) params.set('q', searchQuery);
 
   const res = await apiFetch(`/notes?${params.toString()}`);
   const table = document.getElementById('knowledge-table');

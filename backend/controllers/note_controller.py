@@ -11,10 +11,16 @@ def list_notes(app):
     page = max(page, 1)
     limit = max(min(limit, 50), 1)
 
+    search = request.args.get('q')
     subject = request.args.get('subject')
     topic = request.args.get('topic')
     q = {'user_id': user_id}
-    if subject:
+    if search:
+        q['$or'] = [
+            {'subject': {'$regex': search, '$options': 'i'}},
+            {'topic': {'$regex': search, '$options': 'i'}}
+        ]
+    elif subject:
         q['subject'] = {'$regex': subject, '$options': 'i'}
     if topic:
         q['topic'] = {'$regex': topic, '$options': 'i'}
