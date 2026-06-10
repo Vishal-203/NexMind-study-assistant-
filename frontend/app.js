@@ -98,7 +98,6 @@ function initSidebar() {
   const sidebar = document.getElementById('sidebar');
   const overlay = document.getElementById('sidebar-overlay');
   const toggle = document.getElementById('sidebar-toggle');
-  const close = document.getElementById('sidebar-close');
   
   if (!sidebar) return;
 
@@ -113,7 +112,6 @@ function initSidebar() {
   }
 
   if (toggle) toggle.onclick = openSidebar;
-  if (close) close.onclick = closeSidebar;
   if (overlay) overlay.onclick = closeSidebar;
 
   // Close sidebar when navigating
@@ -134,5 +132,6 @@ function initSidebar() {
 
 document.addEventListener('DOMContentLoaded', () => {
   initDarkMode();
+  initSidebar();
 });
 

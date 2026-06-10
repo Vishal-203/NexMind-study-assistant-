@@ -2,95 +2,243 @@
 <html lang="en">
 
 <head>
-<meta charset="utf-8" />
-<title>Dashboard | AI Study Assistant</title>
-<link rel="stylesheet" href="styles.css" />
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard | NexMind</title>
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="nexmind-redesign.css" />
 </head>
+
 <body class="dashboard-page">
-<div class="app-container">
-  <aside class="sidebar">
-    <div class="sidebar-logo" aria-label="AI Study Assistant">
-      <img class="sidebar-logo__img brand-logo--neon" src="assets/study-logo-theme.png" alt="" aria-hidden="true" />
-<span class="sidebar-logo__text">NexMind</span>
-    </div>
-<nav class="nav-links">
-      <a href="dashboard.html" class="active">Dashboard</a>
-      <a href="notebook.html">Notes</a>
-      <a href="ai_assistant.html">AI Assistant</a>
-      <a href="planner.html">Tasks</a>
-
-
-
-    </nav>
-  </aside>
-
-  <main class="main-content">
-    <section class="page-hero dashboard-hero">
-      <p class="auth-kicker">Study Dashboard</p>
-<h1 id="dashboard-welcome">Welcome</h1>
-      <p class="section-intro">Your AI Assistant is ready. Check your momentum and resume your progress.</p>
-    </section>
-
-    <div class="highlight-card card">
-      <p class="auth-kicker">Status: Optimal</p>
-      <h2 id="checkpoint-heading">Ready for your next session.</h2>
-      <p class="section-intro" id="checkpoint-copy">Pick up where you left off with a focused study path.</p>
-      <div class="dashboard-badges">
-        <span class="badge badge-success" id="checkpoint-task">Focus Session</span>
-        <span class="badge badge-warning" id="checkpoint-count">Priority Tasks</span>
-        <span class="badge badge-success" id="checkpoint-note">Quick Summary</span>
+  <!-- Top Navigation -->
+  <header class="top-nav sticky-top">
+    <div class="top-nav__content">
+      <div class="top-nav__left">
+        <h2 class="page-title">Dashboard</h2>
       </div>
-      <div class="grid-2">
-        <div class="card" style="margin-bottom: 0;">
-          <p style="font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase;">Next deadline</p>
-          <p id="checkpoint-deadline" style="font-weight: 700;">No upcoming deadline</p>
-        </div>
-        <div class="card" style="margin-bottom: 0;">
-          <p style="font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase;">Latest note</p>
-          <p id="checkpoint-note-preview" style="font-weight: 700;">No recent notes</p>
-        </div>
+      <div class="top-nav__center">
+        <input type="text" class="search-input" placeholder="Search notes, tasks, concepts..." aria-label="Global search" />
       </div>
-      <div class="dashboard-actions">
-        <button class="btn" id="checkpoint-action">Open Planner</button>
-        <button class="btn btn-secondary" id="checkpoint-note-action">Open Notebook</button>
+      <div class="top-nav__right">
+        <button aria-label="Notifications" class="icon-btn">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+        </button>
+        <button aria-label="Settings" class="icon-btn">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 1v6m0 6v6M4.22 4.22l4.24 4.24m5.08 5.08l4.24 4.24M1 12h6m6 0h6M4.22 19.78l4.24-4.24m5.08-5.08l4.24-4.24"/></svg>
+        </button>
+        <button class="avatar-btn" aria-label="Profile">V</button>
       </div>
     </div>
+  </header>
+  <div class="app-container">
+    <!-- Sidebar -->
+    <aside id="sidebar" class="sidebar">
+      <div class="sidebar-header">
+        <img class="sidebar-logo__img" src="assets/study-logo-theme.png" alt="" />
+        <span class="sidebar-logo__text">NexMind</span>
+      </div>
 
-    <div class="grid-2">
-      <div class="card">
-        <h3>System Stats</h3>
-        <p class="section-intro">Real-time study metrics.</p>
-        <div id="quick-stats">
-          <p>Analyzing system data...</p>
+      <nav class="nav-links">
+        <a href="dashboard.html" class="active">Dashboard</a>
+        <a href="notebook.html">Notes</a>
+        <a href="ai_assistant.html">AI Assistant</a>
+        <a href="planner.html">Tasks</a>
+        <a href="profile.html">Profile</a>
+      </nav>
+    </aside>
+
+    <!-- Sidebar Overlay (mobile) -->
+    <div id="sidebar-overlay" class="sidebar-overlay"></div>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <!-- Mobile Header -->
+      <div class="mobile-header">
+        <button id="sidebar-toggle" class="hamburger" aria-label="Open menu">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+        </button>
+        <div class="logo-compact">NexMind</div>
+      </div>
+
+      <!-- Dashboard Grid -->
+      <div class="dashboard-grid">
+        <!-- Hero Section -->
+        <section class="hero-section grid-col-full">
+          <div class="hero-left">
+            <p class="hero-kicker">Study Dashboard</p>
+            <h1 class="hero-title">Welcome back, Vishal</h1>
+            <p class="hero-subtitle">Your AI Assistant is ready. Check your momentum and pick the next best action.</p>
+          </div>
+          <div class="hero-right">
+            <div class="stat-badge">
+              <div class="stat-badge__icon">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 2.2"/></svg>
+              </div>
+              <div>
+                <div class="stat-badge__label">Study Streak</div>
+                <div class="stat-badge__value">12 days</div>
+              </div>
+            </div>
+            <div class="stat-badge">
+              <div class="stat-badge__icon">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+              </div>
+              <div>
+                <div class="stat-badge__label">Notes</div>
+                <div class="stat-badge__value">9</div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Quick Stats -->
+        <div class="quick-stats grid-col-full">
+          <div class="stat-card">
+            <div class="stat-icon">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+            </div>
+            <div class="stat-info">
+              <div class="stat-label">Notes</div>
+              <div class="stat-value">9</div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+            </div>
+            <div class="stat-info">
+              <div class="stat-label">Completed</div>
+              <div class="stat-value">42</div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            </div>
+            <div class="stat-info">
+              <div class="stat-label">Pending</div>
+              <div class="stat-value">3</div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 2.2"/></svg>
+            </div>
+            <div class="stat-info">
+              <div class="stat-label">Focus Streak</div>
+              <div class="stat-value">12d</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- AI Match -->
+        <div class="card-section grid-col-main">
+          <div class="card-header">
+            <h3 class="card-title">AI Recommendation</h3>
+            <div class="priority-badge">High</div>
+          </div>
+          <p class="card-subtitle">Next best action to keep your momentum.</p>
+
+          <div class="ai-match-grid">
+            <div>
+              <div class="field-label">Next Best Action</div>
+              <div class="field-value">Complete Project Report</div>
+            </div>
+            <div>
+              <div class="field-label">Estimated Time</div>
+              <div class="field-value">45 minutes</div>
+            </div>
+          </div>
+
+          <div class="button-group mt-4">
+            <button class="btn btn-primary" onclick="window.location.href='planner.html'">Start Now</button>
+            <button class="btn btn-secondary" onclick="window.location.href='planner.html'">View Planner</button>
+          </div>
+        </div>
+
+        <!-- Active Tasks -->
+        <div class="card-section grid-col-side">
+          <div class="card-header">
+            <h3 class="card-title">Active Tasks</h3>
+            <a href="planner.html" class="link-small">Manage</a>
+          </div>
+          <div class="tasks-list">
+            <div class="task-item">
+              <div class="task-title">Project Report</div>
+              <div class="task-progress">
+                <div class="progress-bar">
+                  <div class="progress-fill" style="width:75%"></div>
+                </div>
+                <div class="progress-text">75%</div>
+              </div>
+            </div>
+            <div class="task-item">
+              <div class="task-title">Java Assignment</div>
+              <div class="task-progress">
+                <div class="progress-bar">
+                  <div class="progress-fill" style="width:40%"></div>
+                </div>
+                <div class="progress-text">40%</div>
+              </div>
+            </div>
+            <div class="task-item">
+              <div class="task-title">DBMS Notes</div>
+              <div class="task-progress">
+                <div class="progress-bar">
+                  <div class="progress-fill" style="width:15%"></div>
+                </div>
+                <div class="progress-text">15%</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Knowledge Hub -->
+        <div class="card-section grid-col-full">
+          <div class="card-header">
+            <h3 class="card-title">Knowledge Hub</h3>
+            <div class="knowledge-controls">
+              <input type="text" class="search-mini" placeholder="Search notes" />
+              <button class="btn-filter">Filter</button>
+            </div>
+          </div>
+
+          <div class="knowledge-table">
+            <div class="knowledge-row">
+              <div class="knowledge-title">Java</div>
+              <div class="knowledge-topic">Inheritance</div>
+              <div class="knowledge-date">Feb 21, 2026</div>
+              <button class="btn-access">Open</button>
+            </div>
+            <div class="knowledge-row">
+              <div class="knowledge-title">Inheritance</div>
+              <div class="knowledge-topic">OOP Concepts</div>
+              <div class="knowledge-date">Feb 20, 2026</div>
+              <button class="btn-access">Open</button>
+            </div>
+            <div class="knowledge-row">
+              <div class="knowledge-title">DBMS</div>
+              <div class="knowledge-topic">SQL Queries</div>
+              <div class="knowledge-date">Feb 18, 2026</div>
+              <button class="btn-access">Open</button>
+            </div>
+          </div>
         </div>
       </div>
+    </main>
+  </div>
 
-      <div class="card">
-        <h3>Active Tasks</h3>
-        <p class="section-intro">Your top priorities for this cycle.</p>
-        <div class="action-grid" style="display: grid; grid-template-columns: 1fr; gap: 0.5rem;">
-           <!-- Tasks will be injected here if I had a list, but for now I'll just keep the buttons -->
-           <button class="btn" onclick="window.location='planner.html'">Manage All Tasks</button>
-        </div>
-      </div>
-    </div>
+<!-- Sidebar overlay for mobile slide-in -->
+<div id="sidebar-overlay" class="sidebar-overlay" aria-hidden="true"></div>
 
-    <div class="card">
-      <h3>My Knowledge</h3>
-      <p class="section-intro">Access your stored information nodes.</p>
-
-      <div style="margin-top: 0.75rem; display:flex; gap:0.5rem;">
-        <button class="btn" onclick="window.location='notebook.html'">Open Notes</button>
-        <button class="btn btn-secondary" onclick="window.location='notebook.html?focus=1'">Search & Browse</button>
-      </div>
-
-      <div id="recent-notes-container" style="margin-top: 1rem;">
-        <p>Fetching notes from network...</p>
-      </div>
-    </div>
-
-  </main>
-</div>
+<!-- Bottom navigation for mobile -->
+<nav id="bottom-nav" class="bottom-nav" aria-label="Primary">
+  <a href="dashboard.html" class="bottom-nav__item active">Dashboard</a>
+  <a href="notebook.html" class="bottom-nav__item">Notes</a>
+  <a href="ai_assistant.html" class="bottom-nav__item">AI</a>
+  <a href="planner.html" class="bottom-nav__item">Tasks</a>
+  <a href="profile.html" class="bottom-nav__item">Profile</a>
+</nav>
 
 
 

@@ -105,6 +105,23 @@ body {
   background-blend-mode: normal;
 }
 
+/* Typography: mobile-first sizes */
+h1 { font-size: 22px; }
+h2 { font-size: 16px; }
+body { font-size: 14px; }
+
+@media (min-width: 768px) {
+  h1 { font-size: 26px; }
+  h2 { font-size: 18px; }
+  body { font-size: 15px; }
+}
+
+@media (min-width: 1440px) {
+  h1 { font-size: 32px; }
+  h2 { font-size: 20px; }
+  body { font-size: 16px; }
+}
+
 /* Ensure neural background canvas consistently renders behind all page content */
 #neural-bg {
   z-index: 0;
@@ -116,6 +133,25 @@ body {
   position: relative;
   z-index: 1;
 }
+
+/* Mobile-first: hide sidebar by default and use bottom nav */
+#sidebar { display: none; }
+.sidebar-overlay { display: none; }
+.bottom-nav { display: flex; position: fixed; left: 0; right: 0; bottom: 0; height: 56px; background: rgba(6,18,28,0.86); border-top: 1px solid rgba(255,255,255,0.04); gap: 0.25rem; align-items: center; justify-content: space-around; padding: 0 8px; z-index: 120; }
+.bottom-nav__item { color: var(--text-muted); text-decoration: none; font-weight: 700; font-size: 0.85rem; padding: 8px 12px; border-radius: 10px; }
+.bottom-nav__item.active { color: var(--text-main); background: rgba(255,255,255,0.03); }
+
+/* Mobile header (hamburger) */
+.mobile-header { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 16px; }
+.mobile-header .hamburger { background: transparent; border: none; color: var(--text-main); font-size: 1.6rem; }
+
+/* Dashboard grid container (mobile-first) */
+.dashboard-grid { display: grid; grid-template-columns: 1fr; gap: 16px; padding: 16px; }
+.dashboard-grid .span-12 { grid-column: 1 / -1; }
+.dashboard-grid .span-6 { grid-column: 1 / -1; }
+
+/* Cards full-width on mobile */
+.card { width: 100%; min-height: 80px; }
 
 
 
@@ -632,6 +668,10 @@ h3 { font-size: 1.25rem; }
   box-shadow: 0 14px 30px rgba(0, 0, 0, 0.28), 0 0 22px rgba(102, 255, 242, 0.10);
 }
 
+/* Buttons: ensure minimum touch target */
+.btn, .btn-secondary { min-height: 44px; }
+.btn.full-mobile { width: 100%; }
+
 
 /* Subtle shine effect on buttons */
 .btn::after {
@@ -749,8 +789,8 @@ h3 { font-size: 1.25rem; }
 
 
 /* Grid Systems */
-.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
-.grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; }
+.grid-2 { display: grid; grid-template-columns: 1fr; gap: 1.5rem; }
+.grid-3 { display: grid; grid-template-columns: 1fr; gap: 1.5rem; }
 
 /* AI Chat Specific */
 .result-panel {
@@ -797,6 +837,192 @@ h3 { font-size: 1.25rem; }
   border-radius: 10px;
   overflow-x: auto;
 }
+
+/* Responsive adjustments for smaller viewports */
+/* Tablet: 768px - 1023px */
+@media (min-width: 768px) and (max-width: 1023px) {
+  .sidebar {
+    width: 80px;
+    padding: 0.6rem 0.45rem;
+    overflow: hidden;
+    transition: width 0.22s ease;
+  }
+  .sidebar:hover { width: 220px; }
+
+  .sidebar-logo__text { display: none; }
+
+  .nav-links a {
+    padding: 0.6rem 0.5rem;
+    justify-content: center;
+    font-size: 0.92rem;
+    min-height: 44px;
+  }
+
+  .nav-links a span, .nav-links a .label { display: none; }
+
+  .main-content {
+    margin-left: 72px;
+    width: calc(100% - 72px);
+    padding: 20px;
+  }
+  .dashboard-grid { grid-template-columns: repeat(2, 1fr); gap: 20px; }
+  .grid-2 { grid-template-columns: 1fr 1fr; }
+
+  .grid-2, .grid-3 { gap: 0.75rem; }
+}
+
+/* Hide bottom nav on tablet and above */
+@media (min-width: 768px) {
+  .bottom-nav { display: none; }
+}
+
+/* Laptop: 1024px - 1439px */
+@media (min-width: 1024px) and (max-width: 1439px) {
+  /* show full sidebar */
+  #sidebar { display: block; width: 220px; position: fixed; height: 100vh; }
+  .main-content { margin-left: 220px; width: calc(100% - 220px); padding: 24px; }
+  .dashboard-grid { grid-template-columns: repeat(2, 1fr); gap: 20px; }
+  .grid-2 { grid-template-columns: 1fr 1fr; }
+  .grid-3 { grid-template-columns: repeat(3, 1fr); }
+  .dashboard-grid .span-6 { grid-column: span 1; }
+  .dashboard-grid .span-12 { grid-column: 1 / -1; }
+}
+
+/* Hide mobile header on larger screens */
+@media (min-width: 1024px) {
+  .mobile-header { display: none; }
+}
+
+/* Desktop: 1440px+ */
+@media (min-width: 1440px) {
+  #sidebar { display: block; width: 250px; position: fixed; height: 100vh; }
+  .main-content { margin-left: 250px; width: calc(100% - 250px); padding: 24px; }
+  .dashboard-grid { grid-template-columns: repeat(12, 1fr); gap: 24px; }
+  .dashboard-grid .span-12 { grid-column: 1 / -1; }
+  .dashboard-grid .span-6 { grid-column: span 6; }
+  .dashboard-grid .span-4 { grid-column: span 4; }
+}
+
+/* Desktop-safe overrides (restore original PC layout and spacing) */
+@media (min-width: 1024px) {
+  /* Restore original sidebar width used on desktop */
+  #sidebar { display: block; width: 268px; position: fixed; height: 100vh; }
+
+  /* Ensure sidebar logo text visible on larger screens */
+  .sidebar-logo__text { display: inline-block; }
+
+  /* Restore main-content spacing to original values */
+  .main-content { margin-left: 268px; width: calc(100% - 268px); padding: 2rem 2.5rem; }
+
+  /* Restore grid behavior for larger screens */
+  .dashboard-grid { gap: 24px; }
+  .grid-2 { grid-template-columns: 1fr 1fr; }
+  .grid-3 { grid-template-columns: repeat(3, 1fr); }
+
+  /* Hide mobile-only UI */
+  .mobile-header { display: none; }
+  .bottom-nav { display: none; }
+
+  /* Ensure cards use natural spacing and shadows on desktop */
+  .card, .page-hero, .highlight-card { box-shadow: var(--card-shadow); backdrop-filter: blur(12px); }
+}
+
+@media (max-width: 720px) {
+  /* Stack layout for phones */
+  .app-container { flex-direction: column; }
+
+  .sidebar {
+    position: relative;
+    width: 100%;
+    height: auto;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.6rem 0.8rem;
+  }
+
+  .sidebar-logo { margin-bottom: 0; }
+
+  .nav-links { flex-direction: row; gap: 0.4rem; overflow-x: auto; }
+
+  .nav-links a { min-height: 40px; padding: 0.5rem 0.7rem; }
+
+  .main-content { margin-left: 0; width: 100%; padding: 0.9rem; }
+
+  .grid-2, .grid-3 { grid-template-columns: 1fr; }
+}
+
+#sidebar.active { display: block; position: fixed; left: 0; top: 0; bottom: 0; width: 250px; transform: translateX(0); transition: transform 0.28s ease; z-index: 200; }
+.sidebar-overlay.active { display: block; position: fixed; left: 0; top: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.45); z-index: 150; }
+
+/* Prevent main content from being hidden behind bottom nav on mobile */
+@media (max-width: 767px) {
+  .main-content { padding-bottom: 80px; }
+}
+
+/* Slide transform for mobile only */
+@media (max-width: 1023px) {
+  #sidebar { transform: translateX(-110%); transition: transform 0.28s ease; }
+  #sidebar.active { transform: translateX(0); }
+}
+
+
+@media (max-width: 420px) {
+  /* Tighten typography and spacing on very small screens */
+  h1 { font-size: 1.6rem; }
+  h2 { font-size: 1.15rem; }
+  .btn { padding: 0.6rem 1rem; font-size: 0.9rem; }
+  .input-field { padding: 0.6rem 0.8rem; }
+}
+
+/* Global responsive helpers */
+img, video, canvas, svg {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* Tables and long content */
+.responsive-table {
+  width: 100%;
+  overflow-x: auto;
+}
+
+/* Medium screens: reduce sidebar and stack 3-col grids to 2 */
+@media (max-width: 1024px) {
+  .sidebar { width: 220px; }
+  .main-content { margin-left: 220px; width: calc(100% - 220px); padding: 1.6rem; }
+  .grid-3 { grid-template-columns: 1fr 1fr; }
+}
+
+/* Smaller tablets and large phones */
+@media (max-width: 900px) {
+  .grid-2 { grid-template-columns: 1fr; }
+  .grid-3 { grid-template-columns: 1fr; }
+}
+
+/* Reduce heavy shadows and backdrops on small screens for performance */
+@media (max-width: 720px) {
+  .card, .page-hero, .highlight-card { box-shadow: none; backdrop-filter: none; }
+}
+
+/* Ensure welcome card centers nicely on phones */
+.welcome-shell { display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 1rem; }
+.welcome-card { width: 100%; max-width: 520px; margin: 0 auto; }
+
+/* Navbar wrapping */
+.navbar { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+
+/* Utility: full-width modal/content on small devices */
+.full-mobile { width: 100%; padding-left: 0.8rem; padding-right: 0.8rem; }
+
+/* Accessibility: increase touch targets on small screens */
+@media (max-width: 480px) {
+  .nav-links a, .btn, .input-field { min-height: 48px; }
+  .nav-links { gap: 0.35rem; }
+}
+
 
 .result-content code {
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
