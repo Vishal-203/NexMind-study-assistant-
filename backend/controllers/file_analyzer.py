@@ -195,11 +195,55 @@ def _read_csv(filepath):
         return '\n'.join(lines)
 
 
-def extract_text_from_file(app, file_id):
+def extract_text_from_file(file_id, file_path):
+    """Extract text from a file at file_path.
+
+    NOTE: Ownership checks should be performed by the caller (routes/controllers) before calling this.
+    """
+    file_type = (os.path.splitext(file_path)[1][1:] if file_path else '').lower()
+
+    try:
+        if file_type in ('txt',):
+            text = _read_txt(file_path)
+        elif file_type in ('pdf',):
+            text = _read_pdf(file_path)
+            if not _normalize_text(text):
+                text = _ocr_pdf_images(file_path)
+        elif file_type in ('docx', 'doc'):
+            text = _read_docx(file_path)
+        elif file_type in ('jpg','jpeg','png','gif','bmp','tiff','webp','tif','heic','svg','web','ico'):
+            text = _read_image(file_path)
+        elif file_type in ('xlsx',):
+            text = _read_xlsx(file_path)
+        elif file_type in ('xls',):
+            text = _read_xls(file_path)
+        else:
+            # best-effort: try OCR for images; then plain text fallback
+            try:
+                text = _read_image(file_path)
+            except Exception:
+                text = _read_txt(file_path)
+
+    except Exception as e:
+        return {'success': False, 'message': f'Error extracting file text: {str(e)}', 'status': 500}
+
+    normalized = _normalize_text(text)
+    if not normalized.strip():
+        return {'success': False, 'message': 'No readable text found in the file.', 'status': 400}
+
+    return {'success': True, 'data': {'text': normalized}}
+
+
+# Backward compatible ownership-aware wrapper used by older code paths.
+# Ownership validation should ultimately move to routes.
+
+def extract_text_from_file_app(app, file_id):
     user_id = get_jwt_identity()
     file_obj = parse_object_id(file_id, 'file_id')
     if file_obj is None:
         return {'success': False, 'message': 'Invalid file ID', 'status': 400}
+
+
 
     file_doc = app.mongo.db.files.find_one({'_id': file_obj, 'user_id': user_id})
     if not file_doc:
@@ -209,52 +253,11 @@ def extract_text_from_file(app, file_id):
     if not os.path.exists(filepath):
         return {'success': False, 'message': 'File not found on disk', 'status': 404}
 
-    file_type = (file_doc.get('file_type') or '').lower()
+    # Reuse the new extractor which is path-based.
+    res = extract_text_from_file(file_id, filepath)
+    if not res.get('success'):
+        return res
+    res.setdefault('data', {})
+    res['data']['filename'] = file_doc.get('original_filename')
+    return res
 
-    try:
-        if file_type == 'txt':
-            text = _read_txt(filepath)
-        elif file_type == 'pdf':
-            text = _read_pdf(filepath)
-            if not _normalize_text(text):
-                text = _ocr_pdf_images(filepath)
-        elif file_type in ('docx', 'doc'):
-            text = _read_docx(filepath)
-        # Treat any unknown image extension as an image and OCR it.
-        # Even if the extension is non-standard, PIL will raise if it's not an image.
-        elif file_type in ('jpg', 'jpeg', 'png', 'gif', 'bmp', 'tiff', 'webp'):
-            text = _read_image(filepath)
-        elif file_type == 'xlsx':
-            text = _read_xlsx(filepath)
-        elif file_type == 'xls':
-            text = _read_xls(filepath)
-        else:
-            # Last-resort: attempt OCR for any file that PIL recognizes as an image,
-            # otherwise attempt to treat it as plain text.
-            try:
-                text = _read_image(filepath)
-            except Exception:
-                try:
-                    text = _read_txt(filepath)
-                except Exception:
-                    return {'success': False, 'message': 'Unsupported file type for extraction', 'status': 400}
-
-    except Exception as e:
-        return {'success': False, 'message': f'Error extracting file text: {str(e)}', 'status': 500}
-
-    normalized = _normalize_text(text)
-
-    if not normalized.strip():
-        if file_type == 'pdf':
-            return {
-                'success': False,
-                'message': 'No readable text found. The PDF may be scanned, image-based, or OCR is unavailable.',
-                'status': 400
-            }
-        return {
-            'success': False,
-            'message': 'No readable text found in the file.',
-            'status': 400
-        }
-
-    return {'success': True, 'data': {'text': normalized, 'filename': file_doc.get('original_filename')}}

@@ -29,20 +29,27 @@
     <section class="page-hero admin-hero">
       <p class="auth-kicker">Admin Control Center</p>
       <h1>Review Tasks</h1>
-      <p class="section-intro">This page is wired from Content moderation quick links.</p>
+      <p class="section-intro">Approve or reject tasks waiting for moderation.</p>
     </section>
 
     <div class="card admin-section">
-      <h3>Moderation UI (placeholder)</h3>
-      <p class="section-intro">Backend moderation endpoints are not yet connected. This confirms the quick-link navigation works.</p>
+      <h3>Pending Tasks</h3>
+      <p class="section-intro">Refresh to reload the moderation queue.</p>
+
       <div class="admin-action-grid" style="margin-top:1rem;">
+        <button class="btn" type="button" id="refresh-tasks-btn">Refresh</button>
         <button class="btn btn-secondary" type="button" onclick="window.location.href='admin-dashboard.html#content'">Back to Content</button>
+      </div>
+
+      <div style="margin-top:1rem;" id="pending-tasks-container">
+        <p class="section-intro">Loading pending tasks...</p>
       </div>
     </div>
   </main>
 </div>
 
 <button class="profile-float-btn" type="button" onclick="window.location.href='admin-profile.html'">
+
   <span class="profile-float-btn__icon" aria-hidden="true">
     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
       <path d="M12 12c2.485 0 4.5-2.239 4.5-5S14.485 2 12 2 7.5 4.239 7.5 7s2.015 5 4.5 5Z" fill="currentColor"/>
@@ -52,13 +59,131 @@
   <span class="profile-float-btn__label">Profile</span>
 </button>
 
+<div id="admin-toast" class="admin-toast" style="display:none;"></div>
+
 <script src="../app.js"></script>
 <script>
   requireAuth();
   initDarkMode();
 
+  const toastEl = document.getElementById('admin-toast');
+
+  function showToast(message, type='success') {
+    if (!toastEl) return;
+    toastEl.style.display = 'block';
+    toastEl.textContent = message;
+    toastEl.style.position = 'fixed';
+    toastEl.style.right = '1.25rem';
+    toastEl.style.bottom = '1.25rem';
+    toastEl.style.zIndex = '9999';
+    toastEl.style.maxWidth = '520px';
+    toastEl.style.padding = '0.85rem 1rem';
+    toastEl.style.borderRadius = '12px';
+    toastEl.style.backdropFilter = 'blur(10px)';
+    toastEl.style.border = type === 'success' ? '1px solid rgba(102,255,242,0.30)' : '1px solid rgba(239,83,80,0.34)';
+    toastEl.style.backgroundColor = type === 'success' ? 'rgba(6,14,26,0.85)' : 'rgba(26,6,6,0.85)';
+    toastEl.style.color = type === 'success' ? 'rgba(102,255,242,0.95)' : '#FF8A80';
+    toastEl.style.boxShadow = '0 18px 45px rgba(0,0,0,0.45)';
+    toastEl.style.animation = 'fadeIn 0.18s ease';
+    clearTimeout(showToast._t);
+    showToast._t = setTimeout(()=>{ toastEl.style.display = 'none'; toastEl.textContent=''; }, 3600);
+  }
+
+  function preview(text, maxLen=120) {
+    const t = (text ?? '');
+    if (!t) return '—';
+    return t.length > maxLen ? t.slice(0, maxLen) + '…' : t;
+  }
+
+  function pendingTasksCard(task) {
+    const created = task.created_at ? new Date(task.created_at).toLocaleString() : '—';
+    const title = task.title;
+    const userId = task.user_id;
+    const deadline = task.deadline ? ` · Deadline: ${task.deadline}` : '';
+    const priority = task.priority ? ` · Priority: ${task.priority}` : '';
+
+    return `
+      <div class="card" style="margin-bottom:1rem; padding:1rem 1.1rem; border-left:4px solid var(--primary);">
+        <div style="display:flex; justify-content:space-between; gap:1rem; align-items:flex-start;">
+          <div style="min-width:0;">
+            <div style="font-weight:900; margin-bottom:0.25rem; word-break:break-word;">${preview(title, 160)}</div>
+            <div style="font-size:0.78rem; color:var(--text-muted); margin-bottom:0.35rem;">
+              Creator: <span style="color:rgba(244,244,245,0.82); font-weight:700;">${userId}</span>
+            </div>
+            <div style="font-size:0.82rem; color:var(--text-muted);">
+              Created: ${created}${deadline}${priority}
+            </div>
+          </div>
+          <div style="display:flex; flex-direction:column; gap:0.5rem; flex-shrink:0;">
+            <button class="btn" type="button" onclick="approveTask('${task.id}')">Approve</button>
+            <button class="btn btn-secondary" type="button" onclick="rejectTask('${task.id}')">Reject</button>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  async function loadPendingTasks() {
+    const container = document.getElementById('pending-tasks-container');
+    const refreshBtn = document.getElementById('refresh-tasks-btn');
+    if (!container) return;
+
+    if (refreshBtn) {
+      refreshBtn.disabled = true;
+      refreshBtn.textContent = 'Refreshing...';
+    }
+
+    container.innerHTML = '<p class="section-intro">Loading pending tasks...</p>';
+
+    const res = await apiFetch('/admin/moderation/tasks', 'GET');
+
+    if (refreshBtn) {
+      refreshBtn.disabled = false;
+      refreshBtn.textContent = 'Refresh';
+    }
+
+    if (!res || !res.success) {
+      container.innerHTML = `<p class="section-intro" style="color: var(--text-muted);">Unable to load pending tasks.</p>`;
+      showToast(res?.message || 'Unable to load pending tasks.', 'error');
+      return;
+    }
+
+    const items = res.data?.items || [];
+    if (items.length === 0) {
+      container.innerHTML = '<p class="section-intro">No pending tasks.</p>';
+      return;
+    }
+
+    container.innerHTML = items.map(pendingTasksCard).join('');
+  }
+
+  window.approveTask = async function(taskId) {
+    const res = await apiFetch(`/admin/moderation/tasks/${taskId}/approve`, 'PUT');
+    if (!res || !res.success) {
+      showToast(res?.message || 'Unable to approve task.', 'error');
+      return;
+    }
+    showToast('Task approved successfully.', 'success');
+    await loadPendingTasks();
+  };
+
+  window.rejectTask = async function(taskId) {
+    const res = await apiFetch(`/admin/moderation/tasks/${taskId}`, 'DELETE');
+    if (!res || !res.success) {
+      showToast(res?.message || 'Unable to reject task.', 'error');
+      return;
+    }
+    showToast('Task rejected successfully.', 'success');
+    await loadPendingTasks();
+  };
+
+  const refreshBtn = document.getElementById('refresh-tasks-btn');
+  if (refreshBtn) refreshBtn.onclick = loadPendingTasks;
+
+  loadPendingTasks();
 </script>
 </body>
 </html>
+
 
 

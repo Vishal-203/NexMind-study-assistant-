@@ -5,6 +5,7 @@ from flask_jwt_extended import get_jwt_identity, jwt_required
 from groq import Groq
 
 from controllers.file_analyzer import extract_text_from_file
+from controllers.file_analyzer import extract_text_from_file_app
 from utils.helpers import parse_object_id, resp
 
 
@@ -147,6 +148,10 @@ def answer_question(app):
         data.get('content') or data.get('study_material') or data.get('extracted_text')
     )
 
+    file_result = None
+
+
+
     if not question:
         return resp(False, 'Question is required', status=400)
 
@@ -178,14 +183,30 @@ def answer_question(app):
         context_parts.append(note_result['data']['text'])
 
     if file_id:
-        file_result = extract_text_from_file(app, file_id)
+        file_result = extract_text_from_file_app(app, file_id)
+
+        # If file extraction failed because the stored file is missing on disk,
+        # return a clearer message instead of passing raw backend errors.
+        if not file_result.get('success') and file_result.get('message', '').lower().startswith('error extracting file text:'):
+            # If the extractor tried to open a path built from stored_filename but the stored_filename
+            # isn't present on disk (or the file_id stored_filename is corrupted), handle it gracefully.
+            return resp(False, 'File text extraction failed because the stored file is missing on the server. Please re-upload the same file.', status=404)
+
+        # Also handle the case where extract_text_from_file_app returns the same missing-on-disk error
+        # but with a different message prefix.
+        if not file_result.get('success') and (('no such file or directory' in file_result.get('message','').lower()) or ('file not found on disk' in file_result.get('message','').lower())):
+            return resp(False, 'File text extraction failed because the stored file is missing on the server. Please re-upload the file.', status=404)
+
+
+
         if not file_result.get('success'):
             return resp(
                 False,
                 file_result.get('message', 'File extraction failed'),
                 status=file_result.get('status', 400)
             )
-        context_parts.append(file_result['data']['text'])
+        context_parts.insert(0, file_result['data']['text'])
+
 
     context_text = _combine_context_parts(context_parts)
 
@@ -224,10 +245,12 @@ def summarize_text(app):
         text = note_result['data']['text']
 
     if file_id:
+        # extract_text_from_file supports older app+file_id signature via extract_text_from_file_app.
         file_result = extract_text_from_file(app, file_id)
         if not file_result.get('success'):
             return resp(False, file_result.get('message', 'File extraction failed'), status=file_result.get('status', 400))
         text = file_result['data']['text']
+
 
     if not text:
         return resp(False, 'Text, file_id, or note_id is required', status=400)

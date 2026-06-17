@@ -69,8 +69,15 @@
   <script src="chat-widget.js"></script>
   <script>
     // Ensure auth + theme
-    requireAuth();
-    initDarkMode();
+    // FIX: if the user lands on this page with auth JS that isn't loaded yet,
+    // wrap in a try to avoid silently breaking the chat UI.
+    try {
+      requireAuth();
+      initDarkMode();
+    } catch (e) {
+      console.error('Auth/theme init failed', e);
+    }
+
 
 
 
@@ -92,25 +99,112 @@
       return div.innerHTML;
     }
 
+    // Minimal markdown-ish renderer for AI responses.
+    // The backend/model may return HTML-ish output (like <br/>, &nbsp;, <ul>/<ol>).
+    // We normalize those back into plain newlines before converting to our own HTML.
+    // - preserves newlines
+    // - supports numbered lists (1. item)
+    // - supports bullet lists (- item / * item)
+    // - supports inline code with backticks
+    // - supports fenced code blocks ```...``` (rendered as <pre><code>)
+    function renderMarkdownish(text) {
+      if (text === null || text === undefined) return '';
+      let raw = String(text);
+
+      // Backend/model may return HTML-ish output (<br/>, &nbsp;, <ul>/<ol>, etc.).
+      // Convert the most common separators back to plain newlines so our renderer works.
+      raw = raw.replace(/<br\s*\/?>/gi, '\n');
+      raw = raw.replace(/&nbsp;/gi, ' ');
+      raw = raw.replace(/<\/?ul>/gi, '');
+      raw = raw.replace(/<\/?ol>/gi, '');
+      raw = raw.replace(/<\/?li>/gi, '');
+
+      // Fenced code blocks first
+      const fenceRe = /```[a-zA-Z0-9_-]*\n([\s\S]*?)```/g;
+      let out = '';
+      let last = 0;
+      let m;
+      while ((m = fenceRe.exec(raw)) !== null) {
+        const before = raw.slice(last, m.index);
+        if (before) out += renderMarkdownish._renderInlineAndLists(before);
+        const code = m[1] || '';
+        out += `<pre><code>${escapeHtml(code)}</code></pre>`;
+        last = m.index + m[0].length;
+      }
+      const tail = raw.slice(last);
+      out += renderMarkdownish._renderInlineAndLists(tail);
+      return out;
+    }
+
+    renderMarkdownish._renderInlineAndLists = function (chunk) {
+      const safe = escapeHtml(chunk);
+
+      // Inline code: `code`
+      let html = safe.replace(/`([^`]+)`/g, '<code>$1</code>');
+
+      // Split into lines to process lists
+      const lines = html.split(/\r?\n/);
+      const blocks = [];
+      let i = 0;
+      while (i < lines.length) {
+        const line = lines[i].trim();
+
+        // Numbered list
+        const numMatch = line.match(/^(\d+)\.\s+(.*)$/);
+        if (numMatch) {
+          const items = [];
+          while (i < lines.length) {
+            const l = lines[i].trim();
+            const mm = l.match(/^(\d+)\.\s+(.*)$/);
+            if (!mm) break;
+            items.push(mm[2]);
+            i++;
+          }
+          blocks.push(`<ol><li>${items.join('</li><li>')}</li></ol>`);
+          continue;
+        }
+
+        // Bullet list
+        const bulletMatch = line.match(/^[-*]\s+(.*)$/);
+        if (bulletMatch) {
+          const items = [];
+          while (i < lines.length) {
+            const l = lines[i].trim();
+            const mm = l.match(/^[-*]\s+(.*)$/);
+            if (!mm) break;
+            items.push(mm[1]);
+            i++;
+          }
+          blocks.push(`<ul><li>${items.join('</li><li>')}</li></ul>`);
+          continue;
+        }
+
+        // Normal paragraph line (preserve blank lines)
+        blocks.push(line === '' ? '&nbsp;' : line);
+        i++;
+      }
+
+      // Convert blocks back to HTML with <br> between non-list blocks
+      // If we already have list HTML, keep it separated.
+      return blocks.join('<br/>');
+    };
+
     function addMessage(sender, text) {
+
       if (!messagesEl) return;
       const div = document.createElement('div');
       div.className = 'chat-message chat-message-' + sender;
 
       const timestamp = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
       div.innerHTML =
-        '<div class="chat-message-content">' + escapeHtml(text) + '</div>' +
+        '<div class="chat-message-content">' + (sender === 'ai' ? renderMarkdownish(text) : escapeHtml(text)) + '</div>' +
         '<div class="chat-message-time">' + timestamp + '</div>';
 
       messagesEl.appendChild(div);
       messagesEl.scrollTop = messagesEl.scrollHeight;
     }
 
-    function addTypingIndicator() {
-      const typingId = 'typing-' + Date.now();
-      addMessage('ai', 'Thinking...');
-      return typingId;
-    }
+    // (Optional) typing indicator helper was removed because the UI already adds Thinking... locally.
 
     async function sendChat() {
       const message = (inputEl.value || '').trim();
@@ -133,17 +227,16 @@
       try {
         const res = await apiFetch('/ai/chat', 'POST', { message: message });
 
-        // Remove last thinking message by clearing and re-rendering simplest way:
-        // (We can't reliably locate it with current addMessage implementation.)
-        // So: append answer; it's acceptable for now.
         if (res.success) {
-          addMessage('ai', res.data.answer || "I'm ready to help. What would you like to know?");
+          const raw = res.data.answer || "I'm ready to help. What would you like to know?";
+          addMessage('ai', renderMarkdownish(raw));
         } else {
           showError(res.message || 'AI request failed.');
         }
       } catch (e) {
         showError('Network error. Please check your connection.');
       } finally {
+
         if (sendBtn) {
           sendBtn.disabled = false;
           sendBtn.textContent = 'Send';

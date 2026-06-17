@@ -48,6 +48,8 @@
       </div>
     </div>
 
+    <div id="admin-toast" class="admin-toast" style="display:none;"></div>
+
   </main>
 </div>
 
@@ -56,20 +58,56 @@
   requireAuth();
   initDarkMode();
 
+  const toastEl = document.getElementById('admin-toast');
 
+  function showToast(message, type='success') {
+    if (!toastEl) return;
+    toastEl.style.display = 'block';
+    toastEl.textContent = message;
+    toastEl.style.position = 'fixed';
+    toastEl.style.right = '1.25rem';
+    toastEl.style.bottom = '1.25rem';
+    toastEl.style.zIndex = '9999';
+    toastEl.style.maxWidth = '520px';
+    toastEl.style.padding = '0.85rem 1rem';
+    toastEl.style.borderRadius = '12px';
+    toastEl.style.backdropFilter = 'blur(10px)';
+    toastEl.style.border = type === 'success' ? '1px solid rgba(102,255,242,0.30)' : '1px solid rgba(239,83,80,0.34)';
+    toastEl.style.backgroundColor = type === 'success' ? 'rgba(6,14,26,0.85)' : 'rgba(26,6,6,0.85)';
+    toastEl.style.color = type === 'success' ? 'rgba(102,255,242,0.95)' : '#FF8A80';
+    toastEl.style.boxShadow = '0 18px 45px rgba(0,0,0,0.45)';
+    toastEl.style.animation = 'fadeIn 0.18s ease';
+    clearTimeout(showToast._t);
+    showToast._t = setTimeout(()=>{ toastEl.style.display = 'none'; toastEl.textContent=''; }, 3600);
+  }
+
+  function preview(text, maxLen=120) {
+    const t = (text ?? '');
+    if (!t) return '—';
+    return t.length > maxLen ? t.slice(0, maxLen) + '…' : t;
+  }
 
   function pendingNotesCard(note) {
     const created = note.created_at ? new Date(note.created_at).toLocaleString() : '—';
-    const subject = note.subject || 'Untitled Note';
-    const topic = note.topic ? ` • ${note.topic}` : '';
+    const title = note.subject;
+    const content = note.content;
+    const userId = note.user_id;
+
     return `
       <div class="card" style="margin-bottom:1rem; padding:1rem 1.1rem; border-left:4px solid var(--primary);">
         <div style="display:flex; justify-content:space-between; gap:1rem; align-items:flex-start;">
-          <div>
-            <div style="font-weight:800; margin-bottom:0.25rem;">${subject}${topic}</div>
-            <div style="font-size:0.82rem; color:var(--text-muted);">Updated: ${created}</div>
+          <div style="min-width:0;">
+            <div style="font-weight:900; margin-bottom:0.25rem; word-break:break-word;">${title}</div>
+            <div style="font-size:0.82rem; color:var(--text-muted); margin-bottom:0.35rem;">
+              ${preview(content, 140)}
+            </div>
+            <div style="font-size:0.78rem; color:var(--text-muted);">
+              Creator: <span style="color:rgba(244,244,245,0.82); font-weight:700;">${userId}</span>
+              <span style="opacity:0.6;"> · </span>
+              Created: ${created}
+            </div>
           </div>
-          <div style="display:flex; flex-direction:column; gap:0.5rem;">
+          <div style="display:flex; flex-direction:column; gap:0.5rem; flex-shrink:0;">
             <button class="btn" type="button" onclick="approveNote('${note.id}')">Approve</button>
             <button class="btn btn-secondary" type="button" onclick="rejectNote('${note.id}')">Reject</button>
           </div>
@@ -90,10 +128,7 @@
 
     container.innerHTML = '<p class="section-intro">Loading pending notes...</p>';
 
-    const res = await apiFetch('/auth/moderation/notes', 'GET');
-    console.log('Pending notes response:', res);
-
-
+    const res = await apiFetch('/admin/moderation/notes', 'GET');
 
     if (refreshBtn) {
       refreshBtn.disabled = false;
@@ -102,6 +137,7 @@
 
     if (!res || !res.success) {
       container.innerHTML = `<p class="section-intro" style="color: var(--text-muted);">Unable to load pending notes.</p>`;
+      showToast(res?.message || 'Unable to load pending notes.', 'error');
       return;
     }
 
@@ -115,23 +151,22 @@
   }
 
   window.approveNote = async function(noteId) {
-    const res = await apiFetch(`/auth/moderation/notes/${noteId}/approve`, 'POST');
-
+    const res = await apiFetch(`/admin/moderation/notes/${noteId}/approve`, 'PUT');
     if (!res || !res.success) {
-      alert(res?.message || 'Unable to approve note.');
+      showToast(res?.message || 'Unable to approve note.', 'error');
       return;
     }
+    showToast('Note approved successfully.', 'success');
     await loadPendingNotes();
   };
 
   window.rejectNote = async function(noteId) {
-    const res = await apiFetch(`/auth/moderation/notes/${noteId}/reject`, 'POST');
-
-
+    const res = await apiFetch(`/admin/moderation/notes/${noteId}`, 'DELETE');
     if (!res || !res.success) {
-      alert(res?.message || 'Unable to reject note.');
+      showToast(res?.message || 'Unable to reject note.', 'error');
       return;
     }
+    showToast('Note rejected successfully.', 'success');
     await loadPendingNotes();
   };
 
@@ -143,4 +178,6 @@
 
 </body>
 </html>
+
+
 
