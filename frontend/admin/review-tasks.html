@@ -135,7 +135,7 @@
 
     container.innerHTML = '<p class="section-intro">Loading pending tasks...</p>';
 
-    const res = await apiFetch('/admin/moderation/tasks', 'GET');
+const res = await apiFetch('/auth/moderation/tasks', 'GET');
 
     if (refreshBtn) {
       refreshBtn.disabled = false;
@@ -158,7 +158,7 @@
   }
 
   window.approveTask = async function(taskId) {
-    const res = await apiFetch(`/admin/moderation/tasks/${taskId}/approve`, 'PUT');
+const res = await apiFetch(`/auth/moderation/tasks/${taskId}/approve`, 'PUT');
     if (!res || !res.success) {
       showToast(res?.message || 'Unable to approve task.', 'error');
       return;
@@ -168,7 +168,7 @@
   };
 
   window.rejectTask = async function(taskId) {
-    const res = await apiFetch(`/admin/moderation/tasks/${taskId}`, 'DELETE');
+const res = await apiFetch(`/auth/moderation/tasks/${taskId}`, 'DELETE');
     if (!res || !res.success) {
       showToast(res?.message || 'Unable to reject task.', 'error');
       return;

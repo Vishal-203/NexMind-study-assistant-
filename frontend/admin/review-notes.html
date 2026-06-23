@@ -128,7 +128,7 @@
 
     container.innerHTML = '<p class="section-intro">Loading pending notes...</p>';
 
-    const res = await apiFetch('/admin/moderation/notes', 'GET');
+const res = await apiFetch('/auth/moderation/notes', 'GET');
 
     if (refreshBtn) {
       refreshBtn.disabled = false;
@@ -151,7 +151,7 @@
   }
 
   window.approveNote = async function(noteId) {
-    const res = await apiFetch(`/admin/moderation/notes/${noteId}/approve`, 'PUT');
+const res = await apiFetch(`/auth/moderation/notes/${noteId}/approve`, 'PUT');
     if (!res || !res.success) {
       showToast(res?.message || 'Unable to approve note.', 'error');
       return;
@@ -161,7 +161,7 @@
   };
 
   window.rejectNote = async function(noteId) {
-    const res = await apiFetch(`/admin/moderation/notes/${noteId}`, 'DELETE');
+const res = await apiFetch(`/auth/moderation/notes/${noteId}`, 'DELETE');
     if (!res || !res.success) {
       showToast(res?.message || 'Unable to reject note.', 'error');
       return;

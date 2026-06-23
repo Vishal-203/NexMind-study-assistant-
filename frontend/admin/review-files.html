@@ -126,7 +126,8 @@
 
     container.innerHTML = '<p class="section-intro">Loading pending files...</p>';
 
-    const res = await apiFetch('/admin/moderation/files', 'GET');
+
+    const res = await apiFetch('/auth/moderation/files', 'GET');
 
     if (refreshBtn) {
       refreshBtn.disabled = false;
@@ -149,7 +150,7 @@
   }
 
   window.approveFile = async function(fileId) {
-    const res = await apiFetch(`/admin/moderation/files/${fileId}/approve`, 'PUT');
+const res = await apiFetch(`/auth/moderation/files/${fileId}/approve`, 'PUT');
 
     if (!res || !res.success) {
       showToast(res?.message || 'Unable to approve file.', 'error');
@@ -160,7 +161,7 @@
   };
 
   window.rejectFile = async function(fileId) {
-    const res = await apiFetch(`/admin/moderation/files/${fileId}`, 'DELETE');
+const res = await apiFetch(`/auth/moderation/files/${fileId}`, 'DELETE');
 
     if (!res || !res.success) {
       showToast(res?.message || 'Unable to reject file.', 'error');
