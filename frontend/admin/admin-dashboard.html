@@ -348,7 +348,14 @@ function drawLineChart(canvasId, labels, series, options = {}) {
 async function loadAdminStats() {
   console.log('Loading admin stats...');
   try {
-    const res = await apiFetch('/auth/admin-stats');
+const res = await apiFetch('/auth/admin-stats');
+
+    // Backend responses use keys that exist only if the DB fields match.
+    // Ensure res.data exists before reading charts/metrics.
+    if (!res || typeof res !== 'object' || res.success !== true) {
+      // Keep UI stable; charts will simply not render.
+      console.warn('Admin stats not successful:', res);
+    }
 
     // In parallel load chart data
     const [newUsersRes, noteActivityRes, taskProgressRes] = await Promise.all([
