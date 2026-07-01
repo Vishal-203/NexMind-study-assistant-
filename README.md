@@ -62,6 +62,20 @@ After the fix, newly registered users can successfully log in.
 - MongoDB (local or Atlas)
 - OpenAI API key (for AI features)
 
+## Frontend React (Vite + React + Tailwind)
+
+This repository contains an optional React-based frontend scaffold located in `frontend-react`.
+
+Quick start:
+
+```bash
+cd frontend-react
+npm install
+npm run dev
+```
+
+Customize components in `frontend-react/src/components` and Tailwind configuration in `frontend-react/tailwind.config.cjs`.
+
 ---
 
 ## Setup
