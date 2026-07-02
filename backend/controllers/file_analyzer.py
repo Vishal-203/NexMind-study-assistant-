@@ -200,6 +200,12 @@ def extract_text_from_file(file_id, file_path):
 
     NOTE: Ownership checks should be performed by the caller (routes/controllers) before calling this.
     """
+    if not file_path:
+        return {'success': False, 'message': 'File path is missing.', 'status': 400}
+
+    if not os.path.exists(file_path):
+        return {'success': False, 'message': 'File not found on disk', 'status': 404}
+
     file_type = (os.path.splitext(file_path)[1][1:] if file_path else '').lower()
 
     try:
@@ -224,6 +230,8 @@ def extract_text_from_file(file_id, file_path):
             except Exception:
                 text = _read_txt(file_path)
 
+    except FileNotFoundError:
+        return {'success': False, 'message': 'File not found on disk', 'status': 404}
     except Exception as e:
         return {'success': False, 'message': f'Error extracting file text: {str(e)}', 'status': 500}
 
@@ -239,21 +247,33 @@ def extract_text_from_file(file_id, file_path):
 
 def extract_text_from_file_app(app, file_id):
     user_id = get_jwt_identity()
+
+    if not file_id:
+        return {'success': False, 'message': 'File ID is required', 'status': 400}
+
     file_obj = parse_object_id(file_id, 'file_id')
     if file_obj is None:
+        # Accept a direct stored filename if the client sends one instead of an ObjectId.
+        fallback_path = os.path.join(UPLOAD_FOLDER, file_id)
+        if os.path.exists(fallback_path):
+            res = extract_text_from_file(file_id, fallback_path)
+            if not res.get('success'):
+                return res
+            return res
         return {'success': False, 'message': 'Invalid file ID', 'status': 400}
-
-
 
     file_doc = app.mongo.db.files.find_one({'_id': file_obj, 'user_id': user_id})
     if not file_doc:
         return {'success': False, 'message': 'File not found', 'status': 404}
 
-    filepath = os.path.join(UPLOAD_FOLDER, file_doc['stored_filename'])
+    stored_filename = file_doc.get('stored_filename')
+    if not stored_filename:
+        return {'success': False, 'message': 'Stored file reference is missing', 'status': 404}
+
+    filepath = os.path.join(UPLOAD_FOLDER, stored_filename)
     if not os.path.exists(filepath):
         return {'success': False, 'message': 'File not found on disk', 'status': 404}
 
-    # Reuse the new extractor which is path-based.
     res = extract_text_from_file(file_id, filepath)
     if not res.get('success'):
         return res

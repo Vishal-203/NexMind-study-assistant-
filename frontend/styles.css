@@ -143,15 +143,15 @@ body { font-size: 14px; }
   z-index: 1;
 }
 
-/* Mobile-first: hide sidebar by default and use bottom nav */
-#sidebar { display: none; }
+/* Desktop-first defaults; mobile drawer behavior is enabled only on small screens. */
+#sidebar { display: block; }
 .sidebar-overlay { display: none; }
-.bottom-nav { display: flex; position: fixed; left: 0; right: 0; bottom: 0; height: 56px; background: rgba(6,18,28,0.86); border-top: 1px solid rgba(255,255,255,0.04); gap: 0.25rem; align-items: center; justify-content: space-around; padding: 0 8px; z-index: 120; }
+.bottom-nav { display: none; }
 .bottom-nav__item { color: var(--text-muted); text-decoration: none; font-weight: 700; font-size: 0.85rem; padding: 8px 12px; border-radius: 10px; }
 .bottom-nav__item.active { color: var(--text-main); background: rgba(255,255,255,0.03); }
 
 /* Mobile header (hamburger) */
-.mobile-header { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 16px; }
+.mobile-header { display: none; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 16px; }
 .mobile-header .hamburger { background: transparent; border: none; color: var(--text-main); font-size: 1.6rem; }
 
 /* Dashboard grid container (mobile-first) */
@@ -1034,17 +1034,16 @@ h3 { font-size: 1.25rem; }
   }
 }
 
-#sidebar.active { display: block; position: fixed; left: 0; top: 0; bottom: 0; width: 250px; transform: translateX(0); transition: transform 0.28s ease; z-index: 200; }
-.sidebar-overlay.active { display: block; position: fixed; left: 0; top: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.45); z-index: 150; }
+body.sidebar-open { overflow: hidden; }
+#sidebar.active { display: block; position: fixed; left: 0; top: 0; bottom: 0; width: min(82vw, 280px); transform: translateX(0); transition: transform 0.28s ease; z-index: 200; }
+.sidebar-overlay.active { display: block; position: fixed; left: 0; top: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.55); z-index: 150; }
 
-/* Prevent main content from being hidden behind bottom nav on mobile */
+/* Mobile-only drawer and navigation behavior */
 @media (max-width: 767px) {
-  .main-content { padding-bottom: 80px; }
-}
-
-/* Slide transform for mobile only */
-@media (max-width: 1023px) {
-  #sidebar { transform: translateX(-110%); transition: transform 0.28s ease; }
+  .mobile-header { display: flex; }
+  .bottom-nav { display: flex; position: fixed; left: 0; right: 0; bottom: 0; height: 56px; background: rgba(6,18,28,0.86); border-top: 1px solid rgba(255,255,255,0.04); gap: 0.25rem; align-items: center; justify-content: space-around; padding: 0 8px; z-index: 120; }
+  .main-content { padding-bottom: 92px; }
+  #sidebar { display: block; position: fixed; left: 0; top: 0; bottom: 0; width: min(82vw, 280px); transform: translateX(-110%); transition: transform 0.28s ease; z-index: 200; }
   #sidebar.active { transform: translateX(0); }
 }
 

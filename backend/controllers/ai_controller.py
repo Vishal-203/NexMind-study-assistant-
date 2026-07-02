@@ -187,14 +187,13 @@ def answer_question(app):
 
         # If file extraction failed because the stored file is missing on disk,
         # return a clearer message instead of passing raw backend errors.
-        if not file_result.get('success') and file_result.get('message', '').lower().startswith('error extracting file text:'):
-            # If the extractor tried to open a path built from stored_filename but the stored_filename
-            # isn't present on disk (or the file_id stored_filename is corrupted), handle it gracefully.
-            return resp(False, 'File text extraction failed because the stored file is missing on the server. Please re-upload the same file.', status=404)
-
-        # Also handle the case where extract_text_from_file_app returns the same missing-on-disk error
-        # but with a different message prefix.
-        if not file_result.get('success') and (('no such file or directory' in file_result.get('message','').lower()) or ('file not found on disk' in file_result.get('message','').lower())):
+        if not file_result.get('success') and (
+            file_result.get('message', '').lower().startswith('error extracting file text:')
+            or 'no such file or directory' in file_result.get('message', '').lower()
+            or 'file not found on disk' in file_result.get('message', '').lower()
+            or 'file path is missing' in file_result.get('message', '').lower()
+            or 'stored file reference is missing' in file_result.get('message', '').lower()
+        ):
             return resp(False, 'File text extraction failed because the stored file is missing on the server. Please re-upload the file.', status=404)
 
 
@@ -245,8 +244,7 @@ def summarize_text(app):
         text = note_result['data']['text']
 
     if file_id:
-        # extract_text_from_file supports older app+file_id signature via extract_text_from_file_app.
-        file_result = extract_text_from_file(app, file_id)
+        file_result = extract_text_from_file_app(app, file_id)
         if not file_result.get('success'):
             return resp(False, file_result.get('message', 'File extraction failed'), status=file_result.get('status', 400))
         text = file_result['data']['text']
