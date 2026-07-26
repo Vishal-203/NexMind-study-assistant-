@@ -117,18 +117,18 @@
         <div class="card-section grid-col-main">
           <div class="card-header">
             <h3 class="card-title">AI Recommendation</h3>
-            <div id="recommendation-priority" class="priority-badge">High</div>
+            <div id="recommendation-priority" class="priority-badge">Loading</div>
           </div>
           <p class="card-subtitle">Next best action to keep your momentum.</p>
 
           <div class="ai-match-grid">
             <div>
               <div class="field-label">Next Best Action</div>
-              <div id="recommendation-action" class="field-value">Loading task…</div>
+              <div id="recommendation-action" class="field-value skeleton-line skeleton-line-wide" aria-label="Loading next best action"></div>
             </div>
             <div>
               <div class="field-label">Estimated Time</div>
-              <div id="recommendation-estimate" class="field-value">—</div>
+              <div id="recommendation-estimate" class="field-value skeleton-line skeleton-line-short" aria-label="Loading estimated time"></div>
             </div>
           </div>
 
@@ -145,7 +145,20 @@
             <a href="planner.html" class="link-small">Manage</a>
           </div>
           <div id="active-tasks-list" class="tasks-list">
-            <p class="section-intro">Loading your active tasks...</p>
+            <div class="task-item task-item-skeleton" aria-hidden="true">
+              <div>
+                <div class="skeleton-line skeleton-line-title"></div>
+                <div class="skeleton-line skeleton-line-meta"></div>
+              </div>
+              <div class="skeleton-line skeleton-line-progress"></div>
+            </div>
+            <div class="task-item task-item-skeleton" aria-hidden="true">
+              <div>
+                <div class="skeleton-line skeleton-line-title"></div>
+                <div class="skeleton-line skeleton-line-meta"></div>
+              </div>
+              <div class="skeleton-line skeleton-line-progress"></div>
+            </div>
           </div>
         </div>
 
@@ -160,8 +173,17 @@
           </div>
 
           <div id="knowledge-table" class="knowledge-table">
-            <div class="knowledge-row">
-              <div class="knowledge-title">Loading your notes…</div>
+            <div class="knowledge-row knowledge-row-skeleton" aria-hidden="true">
+              <div class="skeleton-line skeleton-line-title"></div>
+              <div class="skeleton-line skeleton-line-meta"></div>
+              <div class="skeleton-line skeleton-line-date"></div>
+              <div class="skeleton-line skeleton-line-button"></div>
+            </div>
+            <div class="knowledge-row knowledge-row-skeleton" aria-hidden="true">
+              <div class="skeleton-line skeleton-line-title"></div>
+              <div class="skeleton-line skeleton-line-meta"></div>
+              <div class="skeleton-line skeleton-line-date"></div>
+              <div class="skeleton-line skeleton-line-button"></div>
             </div>
           </div>
         </div>
@@ -285,30 +307,102 @@ function renderTaskItem(task) {
   `;
 }
 
-async function loadDashboardTasks() {
-  const taskRes = await apiFetch('/tasks?status=pending&limit=5');
-  const list = document.getElementById('active-tasks-list');
+function renderTaskSkeletons() {
+  return `
+    <div class="task-item task-item-skeleton" aria-hidden="true">
+      <div>
+        <div class="skeleton-line skeleton-line-title"></div>
+        <div class="skeleton-line skeleton-line-meta"></div>
+      </div>
+      <div class="skeleton-line skeleton-line-progress"></div>
+    </div>
+    <div class="task-item task-item-skeleton" aria-hidden="true">
+      <div>
+        <div class="skeleton-line skeleton-line-title"></div>
+        <div class="skeleton-line skeleton-line-meta"></div>
+      </div>
+      <div class="skeleton-line skeleton-line-progress"></div>
+    </div>
+  `;
+}
+
+function renderKnowledgeSkeletons() {
+  return `
+    <div class="knowledge-row knowledge-row-skeleton" aria-hidden="true">
+      <div class="skeleton-line skeleton-line-title"></div>
+      <div class="skeleton-line skeleton-line-meta"></div>
+      <div class="skeleton-line skeleton-line-date"></div>
+      <div class="skeleton-line skeleton-line-button"></div>
+    </div>
+    <div class="knowledge-row knowledge-row-skeleton" aria-hidden="true">
+      <div class="skeleton-line skeleton-line-title"></div>
+      <div class="skeleton-line skeleton-line-meta"></div>
+      <div class="skeleton-line skeleton-line-date"></div>
+      <div class="skeleton-line skeleton-line-button"></div>
+    </div>
+  `;
+}
+
+function setRecommendationLoading() {
   const actionEl = document.getElementById('recommendation-action');
   const estimateEl = document.getElementById('recommendation-estimate');
+
+  if (actionEl) {
+    actionEl.textContent = '';
+    actionEl.classList.add('skeleton-line', 'skeleton-line-wide');
+  }
+
+  if (estimateEl) {
+    estimateEl.textContent = '';
+    estimateEl.classList.add('skeleton-line', 'skeleton-line-short');
+  }
+}
+
+function setRecommendationValue(action, estimate) {
+  const actionEl = document.getElementById('recommendation-action');
+  const estimateEl = document.getElementById('recommendation-estimate');
+
+  if (actionEl) {
+    actionEl.classList.remove('skeleton-line', 'skeleton-line-wide');
+    actionEl.textContent = action;
+  }
+
+  if (estimateEl) {
+    estimateEl.classList.remove('skeleton-line', 'skeleton-line-short');
+    estimateEl.textContent = estimate;
+  }
+}
+
+async function loadDashboardTasks() {
+  const list = document.getElementById('active-tasks-list');
   const priorityEl = document.getElementById('recommendation-priority');
 
   if (!list) return;
+
+  list.innerHTML = renderTaskSkeletons();
+  setRecommendationLoading();
+
+  const taskRes = await apiFetch('/tasks?status=pending&limit=5');
 
   if (taskRes.success && Array.isArray(taskRes.data?.items) && taskRes.data.items.length > 0) {
     const tasks = taskRes.data.items.filter(t => t.status !== 'completed');
     if (tasks.length > 0) {
       list.innerHTML = tasks.slice(0, 3).map(renderTaskItem).join('');
       const nextTask = tasks[0];
-      if (actionEl) actionEl.textContent = nextTask.title || 'Continue task';
-      if (estimateEl) estimateEl.textContent = estimateTaskTime(nextTask.priority);
+      setRecommendationValue(nextTask.title || 'Continue task', estimateTaskTime(nextTask.priority));
       if (priorityEl) priorityEl.textContent = formatPriorityLabel(nextTask.priority);
       return;
     }
   }
 
-  list.innerHTML = '<p class="section-intro">No active tasks found. <a href="planner.html" style="color: var(--primary);">Create a task</a> to get started.</p>';
-  if (actionEl) actionEl.textContent = 'No task available';
-  if (estimateEl) estimateEl.textContent = '—';
+  list.innerHTML = `
+    <div class="empty-state empty-state-compact">
+      <div class="empty-state__title">No active tasks</div>
+      <p>Create a task to give NextMind something useful to recommend.</p>
+      <a href="planner.html" class="empty-state__action">Create task</a>
+    </div>
+  `;
+  setRecommendationValue('No task available', 'Not set');
   if (priorityEl) priorityEl.textContent = 'Medium';
 }
 
@@ -334,16 +428,25 @@ async function loadKnowledgeHub(searchQuery = '') {
   const params = new URLSearchParams({ limit: 5 });
   if (searchQuery) params.set('q', searchQuery);
 
-  const res = await apiFetch(`/notes?${params.toString()}`);
   const table = document.getElementById('knowledge-table');
   if (!table) return;
+
+  table.innerHTML = renderKnowledgeSkeletons();
+
+  const res = await apiFetch(`/notes?${params.toString()}`);
 
   if (res.success && Array.isArray(res.data?.items) && res.data.items.length > 0) {
     table.innerHTML = res.data.items.map(renderKnowledgeRow).join('');
     return;
   }
 
-  table.innerHTML = '<div class="knowledge-row"><div class="knowledge-title">No notes found.</div><div class="knowledge-topic"><a href="notebook.html" style="color: var(--primary);">Create your first note</a></div></div>';
+  table.innerHTML = `
+    <div class="empty-state empty-state-compact knowledge-empty">
+      <div class="empty-state__title">${searchQuery ? 'No matching notes' : 'No notes yet'}</div>
+      <p>${searchQuery ? 'Try a different topic or clear the search.' : 'Create your first note to start building your knowledge hub.'}</p>
+      <a href="notebook.html" class="empty-state__action">Create note</a>
+    </div>
+  `;
 }
 
 function initKnowledgeHubFilter() {

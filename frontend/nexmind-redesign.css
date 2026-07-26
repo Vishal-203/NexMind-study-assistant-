@@ -491,6 +491,105 @@ svg {
   color: rgba(245, 251, 255, 0.95);
 }
 
+/* Loading and empty states */
+.skeleton-line {
+  display: block;
+  height: 14px;
+  border-radius: 999px;
+  background:
+    linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.12), transparent),
+    rgba(255, 255, 255, 0.06);
+  background-size: 220% 100%;
+  animation: skeleton-shimmer 1.4s ease-in-out infinite;
+  color: transparent;
+}
+
+.field-value.skeleton-line {
+  height: 22px;
+  margin-top: 2px;
+}
+
+.skeleton-line-wide {
+  width: min(100%, 260px);
+}
+
+.skeleton-line-short {
+  width: 96px;
+}
+
+.skeleton-line-title {
+  width: min(100%, 190px);
+  height: 16px;
+}
+
+.skeleton-line-meta {
+  width: 118px;
+  margin-top: 10px;
+}
+
+.skeleton-line-progress {
+  width: 120px;
+  height: 8px;
+}
+
+.skeleton-line-date {
+  width: 92px;
+}
+
+.skeleton-line-button {
+  width: 58px;
+  height: 28px;
+  border-radius: 8px;
+}
+
+@keyframes skeleton-shimmer {
+  0% { background-position: 220% 0; }
+  100% { background-position: -220% 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skeleton-line {
+    animation: none;
+  }
+}
+
+.empty-state-compact {
+  width: 100%;
+  padding: 20px;
+  text-align: left;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.035);
+}
+
+.empty-state-compact::before {
+  display: none;
+}
+
+.empty-state__title {
+  color: rgba(245, 251, 255, 0.95);
+  font-size: 14px;
+  font-weight: 800;
+  margin-bottom: 4px;
+}
+
+.empty-state-compact p {
+  color: rgba(155, 186, 205, 0.76);
+  font-size: 13px;
+  margin: 0 0 12px 0;
+}
+
+.empty-state__action {
+  color: rgba(102, 255, 242, 0.9);
+  font-size: 13px;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.empty-state__action:hover {
+  color: rgba(191, 255, 251, 0.98);
+}
+
 /* Buttons */
 .button-group {
   display: flex;
@@ -550,6 +649,11 @@ svg {
 
 .task-item:last-child {
   border-bottom: none;
+}
+
+.task-item-skeleton > div:first-child {
+  width: 55%;
+  min-width: 150px;
 }
 
 .task-title {
@@ -660,6 +764,10 @@ svg {
 .knowledge-date {
   font-size: 13px;
   color: rgba(155, 186, 205, 0.6);
+}
+
+.knowledge-empty {
+  grid-column: 1 / -1;
 }
 
 .btn-access {
