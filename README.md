@@ -124,6 +124,29 @@ Backend runs on:
 
 ---
 
+## Publish / Deploy
+
+This app is ready to deploy as a Python web service on Render or any host that supports a `Procfile`.
+
+For Render:
+
+1. Push this repository to GitHub.
+2. In Render, create a new Blueprint or Web Service from the repository.
+3. Use:
+   - Build command: `pip install -r backend/requirements.txt`
+   - Start command: `gunicorn backend.app:app`
+   - Health check path: `/healthz`
+4. Add these environment variables:
+   - `MONGO_URI`
+   - `OPENAI_API_KEY`
+   - `GROQ_API_KEY` if using Groq features
+   - `SECRET_KEY`
+   - `JWT_SECRET_KEY`
+
+`render.yaml` is included so Render can pre-fill the service settings.
+
+---
+
 ## API Endpoints (high level)
 
 ### Authentication

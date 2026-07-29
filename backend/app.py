@@ -62,12 +62,12 @@ def create_app():
     app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'super-secret')
     app.config['MONGO_URI'] = os.getenv(
         'MONGO_URI',
-        'mongodb://localhost:27017/ai_study_assistant'
+        'mongodb://localhost:27017/ai_study_assistant?serverSelectionTimeoutMS=5000'
     )
     app.config['JWT_SECRET_KEY'] = os.getenv('JWT_SECRET_KEY', app.config['SECRET_KEY'])
 
     CORS(app, supports_credentials=True)
-    mongo = PyMongo(app)
+    mongo = PyMongo(app, serverSelectionTimeoutMS=5000)
     jwt = JWTManager(app)
 
     app.mongo = mongo
@@ -108,6 +108,10 @@ def admin_static(filename):
 @app.route('/')
 def index():
     return send_from_directory(PROJECT_ROOT / 'frontend', 'index.html')
+
+@app.route('/healthz')
+def healthz():
+    return {'status': 'ok'}
 
 if __name__ == '__main__':
     host = os.getenv('HOST', '0.0.0.0')
