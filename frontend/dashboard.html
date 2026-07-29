@@ -1,118 +1,466 @@
 <!doctype html>
 <html lang="en">
+
 <head>
-<meta charset="utf-8" />
-<title>Dashboard | AI Study Assistant</title>
-<link rel="stylesheet" href="styles.css" />
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Dashboard | NextMind</title>
+
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="nexmind-redesign.css" />
 </head>
-<body>
-<div class="app-container">
-  <aside class="sidebar">
-    <div class="sidebar-logo">
-      <div class="pulse-node" style="width: 12px; height: 12px; background: var(--primary); border-radius: 50%;"></div>
-      <span>Neural Flow</span>
-    </div>
-    <nav class="nav-links">
-      <a href="dashboard.html" class="active"><span>📊</span> Dashboard</a>
-      <a href="notebook.html"><span>📓</span> Notes</a>
-      <a href="ai_assistant.html"><span>🧠</span> AI Assistant</a>
-      <a href="planner.html"><span>✅</span> Tasks</a>
-      <a href="profile.html"><span>👤</span> Profile</a>
-      <a href="#" id="logout-sidebar"><span>🚪</span> Logout</a>
-    </nav>
-  </aside>
 
-  <main class="main-content">
-    <section class="page-hero">
-      <p class="auth-kicker">Study Dashboard</p>
-      <h1>Welcome back.</h1>
-      <p class="section-intro">Your neural network of knowledge is ready. Check your momentum and resume your progress.</p>
-    </section>
+<body class="dashboard-page">
+  <div class="app-container">
+    <!-- Sidebar -->
+    <aside id="sidebar" class="sidebar">
+      <div class="sidebar-header">
+        <img class="sidebar-logo__img" src="assets/study-logo-theme.png" alt="" />
+<span class="sidebar-logo__text">NextMind</span>
 
-    <div class="highlight-card card">
-      <p class="auth-kicker">Status: Optimal</p>
-      <h2 id="checkpoint-heading">Ready for your next session.</h2>
-      <p class="section-intro" id="checkpoint-copy">Pick up where you left off with a focused study path.</p>
-      <div style="display: flex; gap: 0.75rem; margin-bottom: 1.5rem; flex-wrap: wrap;">
-        <span class="badge badge-success" id="checkpoint-task">Focus Session</span>
-        <span class="badge badge-warning" id="checkpoint-count">Priority Tasks</span>
-        <span class="badge badge-success" id="checkpoint-note">Quick Summary</span>
       </div>
-      <div class="grid-2">
-        <div class="card" style="margin-bottom: 0;">
-          <p style="font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase;">Next deadline</p>
-          <p id="checkpoint-deadline" style="font-weight: 700;">No upcoming deadline</p>
+
+      <nav class="nav-links">
+        <a href="dashboard.html" class="active">Dashboard</a>
+        <a href="notebook.html">Notes</a>
+        <a href="ai_assistant.html">AI Assistant</a>
+        <a href="planner.html">Tasks</a>
+      </nav>
+    </aside>
+
+    <!-- Sidebar Overlay (mobile) -->
+    <div id="sidebar-overlay" class="sidebar-overlay"></div>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <!-- Mobile Header -->
+      <div class="mobile-header">
+        <button id="sidebar-toggle" class="hamburger" aria-label="Open menu">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+        </button>
+<div class="logo-compact">NextMind</div>
+
+      </div>
+
+      <!-- Dashboard Grid -->
+      <div class="dashboard-grid">
+        <!-- Hero Section -->
+        <section class="hero-section grid-col-full">
+          <div class="hero-left">
+            <p class="hero-kicker">Study Dashboard</p>
+            <h1 id="dashboard-welcome" class="hero-title">Welcome back, Vishal</h1>
+            <p class="hero-subtitle">Your AI Assistant is ready. Check your momentum and pick the next best action.</p>
+          </div>
+          <div class="hero-right">
+            <div class="stat-badge">
+              <div class="stat-badge__icon">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 2.2"/></svg>
+              </div>
+              <div>
+                <div class="stat-badge__label">Study Streak</div>
+                <div id="hero-streak-value" class="stat-badge__value">12 days</div>
+              </div>
+            </div>
+            <div class="stat-badge">
+              <div class="stat-badge__icon">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+              </div>
+              <div>
+                <div class="stat-badge__label">Notes</div>
+                <div id="hero-notes-value" class="stat-badge__value">9</div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Quick Stats -->
+        <div id="quick-stats" class="quick-stats grid-col-full">
+          <div class="stat-card">
+            <div class="stat-icon">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+            </div>
+            <div class="stat-info">
+              <div class="stat-label">Notes</div>
+              <div id="notes-value" class="stat-value">9</div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+            </div>
+            <div class="stat-info">
+              <div class="stat-label">Completed</div>
+              <div id="completed-value" class="stat-value">42</div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            </div>
+            <div class="stat-info">
+              <div class="stat-label">Pending</div>
+              <div id="pending-value" class="stat-value">3</div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 2.2"/></svg>
+            </div>
+            <div class="stat-info">
+              <div class="stat-label">Focus Streak</div>
+              <div id="focus-streak-value" class="stat-value">12d</div>
+            </div>
+          </div>
         </div>
-        <div class="card" style="margin-bottom: 0;">
-          <p style="font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase;">Latest note</p>
-          <p id="checkpoint-note-preview" style="font-weight: 700;">No recent notes</p>
+
+        <!-- AI Match -->
+        <div class="card-section grid-col-main">
+          <div class="card-header">
+            <h3 class="card-title">AI Recommendation</h3>
+            <div id="recommendation-priority" class="priority-badge">Loading</div>
+          </div>
+          <p class="card-subtitle">Next best action to keep your momentum.</p>
+
+          <div class="ai-match-grid">
+            <div>
+              <div class="field-label">Next Best Action</div>
+              <div id="recommendation-action" class="field-value skeleton-line skeleton-line-wide" aria-label="Loading next best action"></div>
+            </div>
+            <div>
+              <div class="field-label">Estimated Time</div>
+              <div id="recommendation-estimate" class="field-value skeleton-line skeleton-line-short" aria-label="Loading estimated time"></div>
+            </div>
+          </div>
+
+          <div class="button-group mt-4">
+            <button class="btn btn-primary" onclick="window.location.href='planner.html'">Start Now</button>
+            <button class="btn btn-secondary" onclick="window.location.href='planner.html'">View Planner</button>
+          </div>
+        </div>
+
+        <!-- Active Tasks -->
+        <div class="card-section grid-col-side">
+          <div class="card-header">
+            <h3 class="card-title">Active Tasks</h3>
+            <a href="planner.html" class="link-small">Manage</a>
+          </div>
+          <div id="active-tasks-list" class="tasks-list">
+            <div class="task-item task-item-skeleton" aria-hidden="true">
+              <div>
+                <div class="skeleton-line skeleton-line-title"></div>
+                <div class="skeleton-line skeleton-line-meta"></div>
+              </div>
+              <div class="skeleton-line skeleton-line-progress"></div>
+            </div>
+            <div class="task-item task-item-skeleton" aria-hidden="true">
+              <div>
+                <div class="skeleton-line skeleton-line-title"></div>
+                <div class="skeleton-line skeleton-line-meta"></div>
+              </div>
+              <div class="skeleton-line skeleton-line-progress"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Knowledge Hub -->
+        <div class="card-section grid-col-full">
+          <div class="card-header">
+            <h3 class="card-title">Knowledge Hub</h3>
+            <div class="knowledge-controls">
+              <input id="knowledge-search-input" type="text" class="search-mini search-mini-wide" placeholder="Search notes or topic" />
+              <button id="knowledge-filter-button" class="btn-filter">Filter</button>
+            </div>
+          </div>
+
+          <div id="knowledge-table" class="knowledge-table">
+            <div class="knowledge-row knowledge-row-skeleton" aria-hidden="true">
+              <div class="skeleton-line skeleton-line-title"></div>
+              <div class="skeleton-line skeleton-line-meta"></div>
+              <div class="skeleton-line skeleton-line-date"></div>
+              <div class="skeleton-line skeleton-line-button"></div>
+            </div>
+            <div class="knowledge-row knowledge-row-skeleton" aria-hidden="true">
+              <div class="skeleton-line skeleton-line-title"></div>
+              <div class="skeleton-line skeleton-line-meta"></div>
+              <div class="skeleton-line skeleton-line-date"></div>
+              <div class="skeleton-line skeleton-line-button"></div>
+            </div>
+          </div>
         </div>
       </div>
-      <div style="margin-top: 1.5rem; display: flex; gap: 1rem;">
-        <button class="btn" id="checkpoint-action">Open Planner</button>
-        <button class="btn btn-secondary" id="checkpoint-note-action">Open Notebook</button>
-      </div>
-    </div>
+    </main>
+  </div>
 
-    <div class="grid-2">
-      <div class="card">
-        <h3>System Stats</h3>
-        <p class="section-intro">Real-time study metrics.</p>
-        <div id="quick-stats">
-          <p>Analyzing system data...</p>
-        </div>
-      </div>
+<!-- Bottom navigation for mobile -->
+<nav id="bottom-nav" class="bottom-nav" aria-label="Primary">
+  <a href="dashboard.html" class="bottom-nav__item active">Dashboard</a>
+  <a href="notebook.html" class="bottom-nav__item">Notes</a>
+  <a href="ai_assistant.html" class="bottom-nav__item">AI</a>
+  <a href="planner.html" class="bottom-nav__item">Tasks</a>
+  <a href="profile.html" class="bottom-nav__item">Profile</a>
+</nav>
 
-      <div class="card">
-        <h3>Active Tasks</h3>
-        <p class="section-intro">Your top priorities for this cycle.</p>
-        <div class="action-grid" style="display: grid; grid-template-columns: 1fr; gap: 0.5rem;">
-           <!-- Tasks will be injected here if I had a list, but for now I'll just keep the buttons -->
-           <button class="btn" onclick="window.location='planner.html'">Manage All Tasks</button>
-        </div>
-      </div>
-    </div>
 
-    <div class="card">
-      <h3>Knowledge Nodes</h3>
-      <p class="section-intro">Recently modified information structures.</p>
-      <div id="recent-notes-container">
-        <p>Fetching notes from network...</p>
-      </div>
+
+<button class="profile-float-btn" type="button" onclick="window.location.href='profile.html'">
+  <span class="profile-float-btn__icon" aria-hidden="true">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <path d="M12 12c2.485 0 4.5-2.239 4.5-5S14.485 2 12 2 7.5 4.239 7.5 7s2.015 5 4.5 5Z" fill="currentColor"/>
+      <path d="M4 22c0-4.418 3.582-8 8-8s8 3.582 8 8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+    </svg>
+  </span>
+  <span class="profile-float-btn__label">Profile</span>
+</button>
+
+<!-- Chat Widget -->
+
+<div id="chat-widget" class="chat-widget">
+  <div class="chat-widget-header">
+    <div class="chat-widget-title">AI Assistant</div>
+    <div class="chat-widget-controls">
+      <button onclick="minimizeChatWidget()">_</button>
+      <button onclick="closeChatWidget()">×</button>
     </div>
-  </main>
+  </div>
+  <div id="chat-messages" class="chat-messages"></div>
+  <div class="chat-input-area">
+    <input type="text" id="chat-input" placeholder="Type a message..." />
+    <button id="chat-send-btn" onclick="sendChatMessage()">Send</button>
+  </div>
 </div>
 
 <script src="app.js"></script>
 <script src="neural-bg.js"></script>
+<script src="chat-widget.js"></script>
 <script>
 requireAuth();
 initDarkMode();
 
-document.getElementById('logout-sidebar').onclick = (e) => {
-  e.preventDefault();
-  clearToken();
-  localStorage.removeItem('user');
-  window.location = 'index.html';
-};
+
 
 async function loadStats() {
   const res = await apiFetch('/user/stats');
-  if(res.success) {
+  if (res.success) {
     const s = res.data;
-    document.getElementById('quick-stats').innerHTML = `
-      <div class="grid-2">
-        <div style="padding: 1rem; border-left: 2px solid var(--primary);">
-          <span style="display: block; font-size: 0.8rem; color: var(--text-muted);">NOTES</span>
-          <span style="font-size: 1.5rem; font-weight: 800; color: var(--primary);">${s.notes}</span>
-        </div>
-        <div style="padding: 1rem; border-left: 2px solid var(--primary);">
-          <span style="display: block; font-size: 0.8rem; color: var(--text-muted);">PENDING</span>
-          <span style="font-size: 1.5rem; font-weight: 800; color: var(--primary);">${s.pending_tasks}</span>
-        </div>
-      </div>
-    `;
+    const notesEl = document.getElementById('notes-value');
+    const completedEl = document.getElementById('completed-value');
+    const pendingEl = document.getElementById('pending-value');
+    const focusEl = document.getElementById('focus-streak-value');
+    const heroNotesEl = document.getElementById('hero-notes-value');
+    const heroStreakEl = document.getElementById('hero-streak-value');
+
+    if (notesEl) notesEl.textContent = s.notes ?? '0';
+    if (completedEl) completedEl.textContent = s.completed_tasks ?? '0';
+    if (pendingEl) pendingEl.textContent = s.pending_tasks ?? '0';
+    if (focusEl) focusEl.textContent = s.focus_streak !== undefined ? `${s.focus_streak}d` : '—';
+    if (heroNotesEl) heroNotesEl.textContent = s.notes ?? '0';
+    if (heroStreakEl) heroStreakEl.textContent = s.focus_streak !== undefined ? `${s.focus_streak} days` : '—';
   }
+}
+
+function estimateTaskTime(priority) {
+  const normalized = String(priority || 'medium').toLowerCase();
+  if (normalized === 'high') return '30 minutes';
+  if (normalized === 'low') return '60 minutes';
+  return '45 minutes';
+}
+
+function formatPriorityLabel(priority) {
+  const normalized = String(priority || 'medium').trim().toLowerCase();
+  return normalized.charAt(0).toUpperCase() + normalized.slice(1);
+}
+
+function computeTaskProgress(task) {
+  if (!task || task.status === 'completed') return 100;
+
+  const now = Date.now();
+  const createdAt = task.created_at ? Date.parse(task.created_at) : null;
+  const deadlineAt = task.deadline ? Date.parse(task.deadline) : null;
+  let percent = 20;
+
+  if (createdAt && deadlineAt && deadlineAt > createdAt) {
+    const total = deadlineAt - createdAt;
+    const elapsed = Math.max(0, now - createdAt);
+    percent = Math.round((elapsed / total) * 100);
+  } else if (deadlineAt) {
+    const daysLeft = Math.max(0, (deadlineAt - now) / 86400000);
+    percent = Math.round(Math.max(10, Math.min(90, 100 - daysLeft * 10)));
+  }
+
+  return Math.min(100, Math.max(0, percent));
+}
+
+function renderTaskItem(task) {
+  const progress = computeTaskProgress(task);
+  const dueLabel = task.deadline ? new Date(task.deadline).toLocaleDateString() : 'No deadline';
+  return `
+    <div class="task-item">
+      <div class="task-title">${task.title || 'Untitled task'}</div>
+      <div class="task-progress">
+        <div class="progress-bar">
+          <div class="progress-fill" style="width:${progress}%"></div>
+        </div>
+        <div class="progress-text">${progress}%</div>
+      </div>
+      <div class="task-meta" style="margin-top:0.55rem; font-size:0.85rem; color:rgba(155,186,205,0.75);">Due ${dueLabel}</div>
+    </div>
+  `;
+}
+
+function renderTaskSkeletons() {
+  return `
+    <div class="task-item task-item-skeleton" aria-hidden="true">
+      <div>
+        <div class="skeleton-line skeleton-line-title"></div>
+        <div class="skeleton-line skeleton-line-meta"></div>
+      </div>
+      <div class="skeleton-line skeleton-line-progress"></div>
+    </div>
+    <div class="task-item task-item-skeleton" aria-hidden="true">
+      <div>
+        <div class="skeleton-line skeleton-line-title"></div>
+        <div class="skeleton-line skeleton-line-meta"></div>
+      </div>
+      <div class="skeleton-line skeleton-line-progress"></div>
+    </div>
+  `;
+}
+
+function renderKnowledgeSkeletons() {
+  return `
+    <div class="knowledge-row knowledge-row-skeleton" aria-hidden="true">
+      <div class="skeleton-line skeleton-line-title"></div>
+      <div class="skeleton-line skeleton-line-meta"></div>
+      <div class="skeleton-line skeleton-line-date"></div>
+      <div class="skeleton-line skeleton-line-button"></div>
+    </div>
+    <div class="knowledge-row knowledge-row-skeleton" aria-hidden="true">
+      <div class="skeleton-line skeleton-line-title"></div>
+      <div class="skeleton-line skeleton-line-meta"></div>
+      <div class="skeleton-line skeleton-line-date"></div>
+      <div class="skeleton-line skeleton-line-button"></div>
+    </div>
+  `;
+}
+
+function setRecommendationLoading() {
+  const actionEl = document.getElementById('recommendation-action');
+  const estimateEl = document.getElementById('recommendation-estimate');
+
+  if (actionEl) {
+    actionEl.textContent = '';
+    actionEl.classList.add('skeleton-line', 'skeleton-line-wide');
+  }
+
+  if (estimateEl) {
+    estimateEl.textContent = '';
+    estimateEl.classList.add('skeleton-line', 'skeleton-line-short');
+  }
+}
+
+function setRecommendationValue(action, estimate) {
+  const actionEl = document.getElementById('recommendation-action');
+  const estimateEl = document.getElementById('recommendation-estimate');
+
+  if (actionEl) {
+    actionEl.classList.remove('skeleton-line', 'skeleton-line-wide');
+    actionEl.textContent = action;
+  }
+
+  if (estimateEl) {
+    estimateEl.classList.remove('skeleton-line', 'skeleton-line-short');
+    estimateEl.textContent = estimate;
+  }
+}
+
+async function loadDashboardTasks() {
+  const list = document.getElementById('active-tasks-list');
+  const priorityEl = document.getElementById('recommendation-priority');
+
+  if (!list) return;
+
+  list.innerHTML = renderTaskSkeletons();
+  setRecommendationLoading();
+
+  const taskRes = await apiFetch('/tasks?status=pending&limit=5');
+
+  if (taskRes.success && Array.isArray(taskRes.data?.items) && taskRes.data.items.length > 0) {
+    const tasks = taskRes.data.items.filter(t => t.status !== 'completed');
+    if (tasks.length > 0) {
+      list.innerHTML = tasks.slice(0, 3).map(renderTaskItem).join('');
+      const nextTask = tasks[0];
+      setRecommendationValue(nextTask.title || 'Continue task', estimateTaskTime(nextTask.priority));
+      if (priorityEl) priorityEl.textContent = formatPriorityLabel(nextTask.priority);
+      return;
+    }
+  }
+
+  list.innerHTML = `
+    <div class="empty-state empty-state-compact">
+      <div class="empty-state__title">No active tasks</div>
+      <p>Create a task to give NextMind something useful to recommend.</p>
+      <a href="planner.html" class="empty-state__action">Create task</a>
+    </div>
+  `;
+  setRecommendationValue('No task available', 'Not set');
+  if (priorityEl) priorityEl.textContent = 'Medium';
+}
+
+function formatDateForHub(value) {
+  const date = value ? new Date(value) : null;
+  if (!date || Number.isNaN(date.getTime())) return 'Unknown';
+  return date.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
+}
+
+function renderKnowledgeRow(note) {
+  const dateLabel = formatDateForHub(note.updated_at || note.created_at);
+  return `
+    <div class="knowledge-row">
+      <div class="knowledge-title">${note.subject || 'Untitled'}</div>
+      <div class="knowledge-topic">${note.topic || 'General'}</div>
+      <div class="knowledge-date">${dateLabel}</div>
+      <a href="notebook.html" class="btn-access">Open</a>
+    </div>
+  `;
+}
+
+async function loadKnowledgeHub(searchQuery = '') {
+  const params = new URLSearchParams({ limit: 5 });
+  if (searchQuery) params.set('q', searchQuery);
+
+  const table = document.getElementById('knowledge-table');
+  if (!table) return;
+
+  table.innerHTML = renderKnowledgeSkeletons();
+
+  const res = await apiFetch(`/notes?${params.toString()}`);
+
+  if (res.success && Array.isArray(res.data?.items) && res.data.items.length > 0) {
+    table.innerHTML = res.data.items.map(renderKnowledgeRow).join('');
+    return;
+  }
+
+  table.innerHTML = `
+    <div class="empty-state empty-state-compact knowledge-empty">
+      <div class="empty-state__title">${searchQuery ? 'No matching notes' : 'No notes yet'}</div>
+      <p>${searchQuery ? 'Try a different topic or clear the search.' : 'Create your first note to start building your knowledge hub.'}</p>
+      <a href="notebook.html" class="empty-state__action">Create note</a>
+    </div>
+  `;
+}
+
+function initKnowledgeHubFilter() {
+  const filterButton = document.getElementById('knowledge-filter-button');
+  const searchInput = document.getElementById('knowledge-search-input');
+
+  if (!filterButton || !searchInput) return;
+
+  const runSearch = () => loadKnowledgeHub(searchInput.value.trim());
+
+  filterButton.addEventListener('click', runSearch);
+  searchInput.addEventListener('keypress', (event) => {
+    if (event.key === 'Enter') runSearch();
+  });
 }
 
 async function loadRecentNotes() {
@@ -125,12 +473,12 @@ async function loadRecentNotes() {
     items.slice(0, 3).forEach(n => {
       const date = new Date(n.updated_at).toLocaleDateString();
       html += `
-        <div class="card" style="margin-bottom: 0; padding: 1rem; display: flex; justify-content: space-between; align-items: center; border-left: 4px solid var(--primary);">
+        <div class="card" style="margin-bottom: 0; padding: 0.8rem 1rem; display: flex; justify-content: space-between; align-items: center; border-left: 4px solid var(--primary);">
           <div>
             <div style="font-weight: 700; color: var(--text-main);">${n.subject}</div>
             <div style="font-size: 0.8rem; color: var(--text-muted);">${n.topic} • ${date}</div>
           </div>
-          <a href="notebook.html" class="btn btn-secondary" style="padding: 0.4rem 1rem; font-size: 0.7rem;">Access</a>
+          <a href="notebook.html" class="btn btn-secondary" style="padding: 0.35rem 0.85rem; font-size: 0.7rem;">Access</a>
         </div>
       `;
     });
@@ -142,6 +490,7 @@ async function loadRecentNotes() {
 }
 
 async function loadCheckpoint() {
+
   const taskRes = await apiFetch('/tasks?limit=1');
   const noteRes = await apiFetch('/notes?limit=1');
   const statsRes = await apiFetch('/user/stats');
@@ -157,12 +506,15 @@ async function loadCheckpoint() {
   const checkpointNotePreview = document.getElementById('checkpoint-note-preview');
 
   const nextTask = taskRes.success && Array.isArray(taskRes.data?.items) && taskRes.data.items[0];
+
+  const hasCheckpointElements = checkpointTask || checkpointCount || checkpointNote || checkpointHeading || checkpointCopy || checkpointAction || checkpointNoteAction || checkpointDeadline || checkpointNotePreview;
+  if (!hasCheckpointElements) return;
   const latestNote = noteRes.success && Array.isArray(noteRes.data?.items) && noteRes.data.items[0];
   const pendingTasks = statsRes.success ? statsRes.data.pending_tasks : null;
 
   if (nextTask) {
     checkpointTask.textContent = nextTask.title;
-    checkpointHeading.textContent = 'Neural match: Next task ready';
+checkpointHeading.textContent = 'AI Match: Next task ready';
     checkpointCopy.textContent = `Resume your focus cycle with: ${nextTask.title}.`;
     checkpointDeadline.textContent = nextTask.deadline ? nextTask.deadline : 'Continuous';
     checkpointAction.textContent = 'Go to Planner';
@@ -181,9 +533,32 @@ async function loadCheckpoint() {
   checkpointNoteAction.onclick = () => window.location = 'notebook.html';
 }
 
+async function applyDashboardWelcome() {
+  const headingEl = document.getElementById('dashboard-welcome');
+  if (!headingEl) return;
+
+  const user = JSON.parse(localStorage.getItem('user') || '{}');
+  const name = (user.name || user.username || user.full_name || '').trim();
+
+  // Heuristic: if this is a returning session, show “Welcome back …”.
+  // New users typically won't have any prior dashboard flag.
+  const returning = localStorage.getItem('hasSeenDashboard') === 'true';
+  if (!returning) localStorage.setItem('hasSeenDashboard', 'true');
+
+  if (name) {
+    headingEl.textContent = returning ? `Welcome back, ${name}` : `Welcome, ${name}`;
+  } else {
+    headingEl.textContent = returning ? 'Welcome back' : 'Welcome';
+  }
+}
+
 loadStats();
 loadRecentNotes();
+loadDashboardTasks();
+loadKnowledgeHub();
+initKnowledgeHubFilter();
 loadCheckpoint();
+applyDashboardWelcome();
 </script>
 </body>
 </html>

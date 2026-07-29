@@ -1,0 +1,19 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root{
+  --bg-main: #020617;
+  --glass: rgba(255,255,255,0.03);
+  --glass-border: rgba(255,255,255,0.06);
+  --neon: #66fff2;
+}
+
+html,body,#root{height:100%;}
+body{@apply bg-gradient-to-br from-[#000] via-[#030017] to-[#020a18] text-white font-sans;}
+
+.card-glass{background:var(--glass); border:1px solid var(--glass-border); backdrop-filter: blur(14px); box-shadow: 0 10px 30px rgba(0,0,0,0.6); border-radius: 14px}
+
+.btn-primary{background:linear-gradient(90deg,var(--neon),var(--accent)); color:#000}
+.btn-primary:hover{filter:brightness(1.03)}
+

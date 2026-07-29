@@ -1,50 +1,59 @@
-<!doctype html>
+
 <html lang="en">
 <head>
 <meta charset="utf-8" />
 <title>Digital Notebook | AI Study Assistant</title>
 <link rel="stylesheet" href="styles.css" />
+<link rel="stylesheet" href="nexmind-redesign.css" />
 </head>
-<body>
+<body class="compact-page">
 <div class="app-container">
-  <aside class="sidebar">
-    <div class="sidebar-logo">
-      <div class="pulse-node" style="width: 12px; height: 12px; background: var(--primary); border-radius: 50%;"></div>
-      <span>Neural Flow</span>
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-header" aria-label="AI Study Assistant">
+<img class="sidebar-logo__img brand-logo--neon" src="assets/study-logo-theme.png" alt="" aria-hidden="true" />
+<span class="sidebar-logo__text">NextMind</span>
     </div>
-    <nav class="nav-links">
-      <a href="dashboard.html"><span>📊</span> Dashboard</a>
-      <a href="notebook.html" class="active"><span>📓</span> Notes</a>
-      <a href="ai_assistant.html"><span>🧠</span> AI Assistant</a>
-      <a href="planner.html"><span>✅</span> Tasks</a>
-      <a href="profile.html"><span>👤</span> Profile</a>
-      <a href="#" id="logout-sidebar"><span>🚪</span> Logout</a>
+<nav class="nav-links">
+      <a href="dashboard.html">Dashboard</a>
+      <a href="notebook.html" class="active">Notes</a>
+      <a href="ai_assistant.html">AI Assistant</a>
+      <a href="planner.html">Tasks</a>
     </nav>
+
   </aside>
 
   <main class="main-content">
     <section class="page-hero">
       <p class="auth-kicker">Digital Notebook</p>
-      <h1>Knowledge Synthesis</h1>
-      <p class="section-intro">Capture ideas, sketch diagrams, and organize your neural network of information.</p>
+      <h1>Study Notes</h1>
+      <p class="section-intro">Capture ideas, sketch diagrams, and organize your study materials.</p>
     </section>
 
     <div class="grid-2">
       <div class="card">
-        <h3>New Node</h3>
+        <h3>New Note</h3>
         <p class="section-intro">Initialize a new knowledge structure.</p>
         <input id="note-subject" class="input-field" placeholder="Subject" />
         <input id="note-topic" class="input-field" placeholder="Topic" />
         <textarea id="note-content" class="input-field" rows="4" placeholder="Input raw information..."></textarea>
         <input id="note-tags" class="input-field" placeholder="Tags (comma-separated)" />
-        <button class="btn" id="save-note">Save Node</button>
+        <button class="btn" id="save-note">Save Note</button>
       </div>
 
       <div class="card">
         <h3>Visual Mapping</h3>
         <p class="section-intro">Sketch complex relationships and formulas.</p>
-        <canvas id="canvas" width="760" height="320" style="border:1px solid rgba(0, 229, 255, 0.2); width:100%; cursor:crosshair; background:rgba(0,0,0,0.3); border-radius:12px;"></canvas>
-        <div style="margin-top: 1rem; display: flex; gap: 0.5rem;">
+
+        <div style="margin-top: 0.75rem; display:flex; gap:0.5rem; flex-wrap:wrap; align-items:center; padding:0.6rem 0.75rem; border:1px solid rgba(255,255,255,0.08); border-radius:12px; background: rgba(0,0,0,0.22);">
+          <input id="map-subject" class="input-field" placeholder="Subject" style="flex:1; min-width: 180px;" />
+          <input id="map-topic" class="input-field" placeholder="Topic" style="flex:1; min-width: 180px;" />
+        </div>
+
+        <canvas id="canvas" width="760" height="320" style="border:1px solid rgba(255, 255, 255, 0.18); width:100%; cursor:crosshair; background:rgba(0,0,0,0.3); border-radius:12px;"></canvas>
+        <div style="margin-top: 0.75rem; display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap;">
+          <label style="display:flex; align-items:center; gap:0.5rem; color: var(--text-muted); font-size:0.8rem;">Pen:
+            <input id="pen-color" type="color" value="#F4F4F5" style="width:44px; height:34px; padding:0; border:none; background:transparent;" />
+          </label>
           <button class="btn btn-muted" id="clear-canvas">Clear</button>
           <button class="btn" id="save-drawing">Save Sketch</button>
         </div>
@@ -55,7 +64,7 @@
     <div class="grid-2">
       <div class="card">
         <h3>My Knowledge <span id="note-count" style="font-size:0.8rem; color:var(--text-muted);">(0)</span></h3>
-        <p class="section-intro">Access your stored information nodes.</p>
+Access your stored information notes.
         <input id="filter-input" class="input-field" placeholder="Search network..." />
         <ul id="note-list" style="max-height:400px; overflow-y:auto; list-style: none;"></ul>
         <div id="note-pagination" style="display:flex; gap:0.5rem; align-items:center; margin-top:0.75rem;"></div>
@@ -67,21 +76,27 @@
         <input id="file-input" type="file" class="input-field" />
         <button class="btn" id="upload-file" style="width:100%;">Upload Resource</button>
         <p id="file-msg" style="display:none; font-size:0.8rem; margin-top:0.5rem;"></p>
-        <ul id="file-list" style="max-height:400px; overflow-y:auto; list-style: none; margin-top: 1rem;"></ul>
+        <ul id="file-list" style="max-height:400px; overflow-y:auto; list-style: none; margin-top: 0.75rem;"></ul>
       </div>
     </div>
 
-    <div class="card">
-      <h3>Shared Nodes <span id="shared-count" style="font-size:0.8rem; color:var(--text-muted);">(0)</span></h3>
-      <p class="section-intro">Information shared by other network participants.</p>
-      <ul id="shared-note-list" style="max-height:300px; overflow-y:auto; list-style: none;"></ul>
-    </div>
+
   </main>
 </div>
 
-<div id="share-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:1000; align-items:center; justify-content:center; backdrop-filter: blur(5px);">
+<button class="profile-float-btn" type="button" onclick="window.location.href='profile.html'">
+  <span class="profile-float-btn__icon" aria-hidden="true">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <path d="M12 12c2.485 0 4.5-2.239 4.5-5S14.485 2 12 2 7.5 4.239 7.5 7s2.015 5 4.5 5Z" fill="currentColor"/>
+      <path d="M4 22c0-4.418 3.582-8 8-8s8 3.582 8 8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+    </svg>
+  </span>
+  <span class="profile-float-btn__label">Profile</span>
+</button>
+
+<div id="share-modal"
   <div class="card" style="max-width:500px; width:90%; margin:0;">
-    <h3>Share Node</h3>
+    <h3>Share Note</h3>
     <p id="share-msg" style="color:var(--primary); font-size: 0.9rem;"></p>
     <input id="share-email" class="input-field" placeholder="Recipient Network ID (Email)" />
     <div style="display:flex; gap:0.5rem;">
@@ -89,47 +104,88 @@
       <button class="btn btn-muted" onclick="closeShareModal()">Cancel</button>
     </div>
     <hr style="margin:1rem 0; border: none; border-top: 1px solid rgba(255,255,255,0.1);">
-    <h4>Current Participants:</h4>
     <ul id="share-list" style="max-height:200px; overflow-y:auto; list-style: none;"></ul>
+  </div>
+</div>
+
+
+
+</div>
+
+<button class="ask-ai-btn" onclick="openChatWidget()">Ask AI</button>
+
+
+<!-- Chat Widget -->
+<div id="chat-widget" class="chat-widget">
+  <div class="chat-widget-header">
+    <div class="chat-widget-title">AI Assistant</div>
+    <div class="chat-widget-controls">
+      <button onclick="minimizeChatWidget()">_</button>
+      <button onclick="closeChatWidget()">×</button>
+    </div>
+  </div>
+  <div id="chat-messages" class="chat-messages"></div>
+  <div class="chat-input-area">
+    <input type="text" id="chat-input" placeholder="Type a message..." />
+    <button id="chat-send-btn" onclick="sendChatMessage()">Send</button>
   </div>
 </div>
 
 <script src="app.js"></script>
 <script src="neural-bg.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<script src="chat-widget.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script>
 requireAuth();
 initDarkMode();
 
-document.getElementById('logout-sidebar').onclick = (e) => {
-  e.preventDefault();
-  clearToken();
-  localStorage.removeItem('user');
-  window.location = 'index.html';
-};
+
 
 const ctx = document.getElementById('canvas').getContext('2d');
 let painting = false;
 let notePage = 1;
 const noteLimit = 10;
 
-function start(){ painting = true; }
-function stop(){ painting = false; ctx.beginPath(); }
-function draw(e){
-  if(!painting) return;
+function getPos(e){
   const rect = e.target.getBoundingClientRect();
-  ctx.lineWidth = 2;
-  ctx.lineCap = 'round';
-  ctx.strokeStyle = '#00E5FF';
-  ctx.lineTo(e.clientX - rect.left, e.clientY - rect.top);
-  ctx.stroke();
-  ctx.beginPath();
-  ctx.moveTo(e.clientX - rect.left, e.clientY - rect.top);
+  return { x: e.clientX - rect.left, y: e.clientY - rect.top };
 }
 
-document.getElementById('canvas').addEventListener('mousedown', start);
-document.getElementById('canvas').addEventListener('mouseup', stop);
-document.getElementById('canvas').addEventListener('mousemove', draw);
+function start(e){
+  painting = true;
+  try { e.target.setPointerCapture(e.pointerId); } catch(_){ }
+  ctx.beginPath();
+  const {x,y} = getPos(e);
+  ctx.moveTo(x,y);
+}
+function stop(e){
+  painting = false;
+  ctx.beginPath();
+  try { e.target.releasePointerCapture(e.pointerId); } catch(_){ }
+}
+
+function draw(e){
+  if(!painting) return;
+  const {x,y} = getPos(e);
+  const colorEl = document.getElementById('pen-color');
+  const color = colorEl ? colorEl.value : '#F4F4F5';
+
+  ctx.lineWidth = 2;
+  ctx.lineCap = 'round';
+  ctx.strokeStyle = color;
+  ctx.lineTo(x, y);
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.moveTo(x,y);
+}
+
+const canvasEl = document.getElementById('canvas');
+canvasEl.style.touchAction = 'none';
+canvasEl.addEventListener('pointerdown', start);
+canvasEl.addEventListener('pointerup', stop);
+canvasEl.addEventListener('pointercancel', stop);
+canvasEl.addEventListener('pointermove', draw);
+
 document.getElementById('clear-canvas').onclick = () => ctx.clearRect(0,0,760,320);
 
 async function loadNotes(filter=''){
@@ -145,30 +201,32 @@ async function loadNotes(filter=''){
   countEl.textContent = `(${r.data.total || 0})`;
 
   if(filtered.length === 0){
-    list.innerHTML = '<li style="color: var(--text-muted);">No nodes found.</li>';
+    // No notes found.
   } else {
     filtered.forEach(n => {
       const li = document.createElement('li');
       li.className = 'card';
-      li.style.marginBottom = '0.75rem';
-      li.style.padding = '1rem';
+      li.style.marginBottom = '0.5rem';
+      li.style.padding = '0.8rem 0.9rem';
       li.style.borderLeft = '3px solid var(--primary)';
       const tagsHtml = (n.tags||[]).length > 0
-        ? `<div style="margin-top:0.5rem;">${n.tags.map(t=>`<span class="badge" style="background: rgba(0,229,255,0.1); color: var(--primary); margin-right: 0.25rem;">${t}</span>`).join('')}</div>`
+        ? `<div style="margin-top:0.5rem;">${n.tags.map(t=>`<span class="badge" style="background: rgba(255,255,255,0.1); color: var(--primary); margin-right: 0.25rem;">${t}</span>`).join('')}</div>`
         : '';
       li.innerHTML = `
         <div style="font-weight: 700;">${n.subject}</div>
         <div style="font-size: 0.8rem; color: var(--text-muted);">${n.topic}</div>
         ${tagsHtml}
-        <div style="display:flex; gap:0.5rem; margin-top:1rem;">
+        <div style="display:flex; gap:0.5rem; margin-top:0.75rem; flex-wrap:wrap;">
           <button class="btn btn-secondary" style="padding: 0.3rem 0.8rem; font-size: 0.7rem;" onclick="editNote('${n.id}')">Edit</button>
           <button class="btn btn-secondary" style="padding: 0.3rem 0.8rem; font-size: 0.7rem;" onclick="exportPDF('${n.id}')">PDF</button>
-          <button class="btn btn-secondary" style="padding: 0.3rem 0.8rem; font-size: 0.7rem;" onclick="openShareModal('${n.id}')">Share</button>
+
+
           <button class="btn btn-muted" style="padding: 0.3rem 0.8rem; font-size: 0.7rem;" onclick="deleteNote('${n.id}')">Delete</button>
         </div>
       `;
       list.appendChild(li);
     });
+
   }
   updateNotePagination(r.data);
 }
@@ -190,7 +248,6 @@ async function loadSharedNotes() {
   const list = document.getElementById('shared-note-list');
   const countEl = document.getElementById('shared-count');
   if (!res.success || !res.data || res.data.length === 0) {
-    list.innerHTML = '<li style="color: var(--text-muted);">No external nodes available.</li>';
     countEl.textContent = '(0)';
     return;
   }
@@ -199,12 +256,12 @@ async function loadSharedNotes() {
   res.data.forEach(n => {
     const li = document.createElement('li');
     li.className = 'card';
-    li.style.marginBottom = '0.75rem';
-    li.style.padding = '1rem';
+    li.style.marginBottom = '0.5rem';
+    li.style.padding = '0.8rem 0.9rem';
     li.innerHTML = `
       <div style="font-weight: 700;">${n.subject}</div>
       <div style="font-size: 0.8rem; color: var(--text-muted);">${n.topic}</div>
-      <div style="display:flex; gap:0.5rem; margin-top:1rem;">
+      <div style="display:flex; gap:0.5rem; margin-top:0.75rem;">
         <button class="btn btn-secondary" style="padding: 0.3rem 0.8rem; font-size: 0.7rem;" onclick="viewNote('${n.id}')">Access</button>
         <button class="btn btn-secondary" style="padding: 0.3rem 0.8rem; font-size: 0.7rem;" onclick="exportPDF('${n.id}')">PDF</button>
       </div>
@@ -223,7 +280,7 @@ window.openShareModal = async(noteId) => {
   const shareList = document.getElementById('share-list');
   if (res.success && res.data.length > 0) {
     shareList.innerHTML = res.data.map(u => `
-      <li style="padding:0.75rem; display:flex; justify-content:space-between; align-items:center; border-bottom: 1px solid rgba(255,255,255,0.05);">
+      <li style="padding:0.55rem 0.75rem; display:flex; justify-content:space-between; align-items:center; border-bottom: 1px solid rgba(255,255,255,0.05);">
         <span style="font-size: 0.9rem;">${u.name}</span>
         <button class="btn btn-muted" style="padding: 0.2rem 0.5rem; font-size: 0.6rem;" onclick="unshareNote('${noteId}', '${u.id}')">Revoke</button>
       </li>
@@ -238,7 +295,7 @@ window.closeShareModal = () => { document.getElementById('share-modal').style.di
 window.shareNote = async(noteId, email) => {
   const res = await apiFetch(`/notes/${noteId}/share`, 'POST', { email });
   if (res.success) {
-    document.getElementById('share-msg').textContent = 'Node transmission successful!';
+    document.getElementById('share-msg').textContent = 'Note transmission successful!';
     document.getElementById('share-email').value = '';
     setTimeout(() => openShareModal(noteId), 1000);
   } else {
@@ -316,13 +373,34 @@ loadNotes();
 loadSharedNotes();
 document.getElementById('filter-input').oninput = (e)=> { notePage = 1; loadNotes(e.target.value); };
 
+function prefillNewNoteFromQueryParams() {
+  try {
+    const params = new URLSearchParams(window.location.search);
+    const subject = params.get('subject');
+    const topic = params.get('topic');
+    const content = params.get('content');
+    if (subject) document.getElementById('note-subject').value = subject;
+    if (topic) document.getElementById('note-topic').value = topic;
+    if (content) document.getElementById('note-content').value = content;
+  } catch (e) {
+    // no-op
+  }
+}
+
+prefillNewNoteFromQueryParams();
+
 document.getElementById('save-note').onclick = async ()=>{
   const sub = document.getElementById('note-subject').value.trim();
   const top = document.getElementById('note-topic').value.trim();
   const content = document.getElementById('note-content').value;
+  // Debug: verify the click handler and payload.
+  console.log('save-note click', { sub, top, contentLen: (content || '').length });
   const tagsInput = document.getElementById('note-tags').value.trim();
   const tags = tagsInput ? tagsInput.split(',').map(t=>t.trim()).filter(t=>t) : [];
-  if(!sub || !top) return;
+  if(!sub || !top) {
+    console.warn('Save Note missing subject/topic', { sub, top });
+    return;
+  }
   const res = await apiFetch('/notes','POST',{subject:sub,topic:top,content,tags});
   if(res.success){
     document.getElementById('note-subject').value = '';
@@ -334,13 +412,21 @@ document.getElementById('save-note').onclick = async ()=>{
 };
 
 document.getElementById('save-drawing').onclick = async()=>{
-  const sub = document.getElementById('note-subject').value.trim();
-  const top = document.getElementById('note-topic').value.trim();
+  const sub = document.getElementById('map-subject').value.trim();
+  const top = document.getElementById('map-topic').value.trim();
   if(!sub || !top) return;
+
   const drawing = document.getElementById('canvas').toDataURL();
+
+  if(!drawing || drawing.length < 1000) {
+    document.getElementById('drawing-msg').textContent = 'Sketch canvas is empty. Draw something before saving.';
+    return;
+  }
+
   const res = await apiFetch('/notes','POST',{subject:sub,topic:top,content:'[Visual Map]',drawing});
   if(res.success){
     ctx.clearRect(0,0,760,320);
+    document.getElementById('drawing-msg').textContent = '';
     loadNotes();
   }
 };
@@ -352,6 +438,10 @@ window.editNote = async(id)=>{
   document.getElementById('note-subject').value = note.subject;
   document.getElementById('note-topic').value = note.topic;
   document.getElementById('note-content').value = note.content || '';
+
+  document.getElementById('map-subject').value = note.subject || '';
+  document.getElementById('map-topic').value = note.topic || '';
+
   if(note.drawing){
     const img = new Image();
     img.onload = ()=>ctx.drawImage(img,0,0,760,320);
@@ -368,21 +458,419 @@ window.editNote = async(id)=>{
 
 window.viewNote = async(id)=>{
   const r = await apiFetch(`/notes/${id}`);
-  if(r.success) alert(`Node Data:\n\n${r.data.content || 'Empty'}`);
+  if(r.success) alert(`Note Data:\n\n${r.data.content || 'Empty'}`);
 };
 
-window.deleteNote = async(id)=>{ if(confirm('Delete node?')) { await apiFetch(`/notes/${id}`,'DELETE'); loadNotes(); } };
-
+window.deleteNote = async(id)=>{ if(confirm('Delete note?')) { await apiFetch(`/notes/${id}`,'DELETE'); loadNotes(); } };
 window.exportPDF = async(id) => {
   const r = await apiFetch(`/notes/${id}`);
-  if(!r.success) return;
+  if(!r.success){ alert('Failed to load note.'); return; }
   const n = r.data;
-  const el = document.createElement('div');
-  el.style.padding = '20px';
-  el.style.color = '#000';
-  el.innerHTML = `<h2>${n.subject}</h2><p><strong>Topic:</strong> ${n.topic}</p><hr><p>${(n.content || '').replace(/\n/g, '<br>')}</p>`;
-  html2pdf().set({ margin: 10, filename: `${n.subject}.pdf` }).from(el).save();
+
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ unit: 'pt', format: 'a4', orientation: 'portrait' });
+
+  const pageW = doc.internal.pageSize.getWidth();
+  const pageH = doc.internal.pageSize.getHeight();
+  const margin = 40;
+  const contentWidth = pageW - margin * 2;
+  let y = margin;
+
+  function checkPageBreak(needed) {
+    needed = needed || 20;
+    if (y + needed > pageH - margin) { doc.addPage(); y = margin; }
+  }
+
+  function drawWrappedText(text, fontSize, isBold, r, g, b) {
+    doc.setFontSize(fontSize);
+    doc.setFont('helvetica', isBold ? 'bold' : 'normal');
+    doc.setTextColor(r, g, b);
+    var lines = doc.splitTextToSize(String(text || ''), contentWidth);
+    lines.forEach(function(line) {
+      checkPageBreak(fontSize + 4);
+      doc.text(line, margin, y);
+      y += fontSize + 4;
+    });
+  }
+
+  // Header bar
+  doc.setFillColor(30, 30, 60);
+  doc.rect(0, 0, pageW, 54, 'F');
+  doc.setFontSize(16);
+  doc.setFont('helvetica', 'bold');
+  doc.setTextColor(255, 255, 255);
+  doc.text('AI Study Assistant — Note Export', margin, 34);
+  y = 74;
+
+  // Subject
+  drawWrappedText(n.subject || 'Untitled', 18, true, 20, 20, 80);
+  y += 4;
+
+  // Topic
+  drawWrappedText('Topic: ' + (n.topic || '—'), 12, false, 80, 80, 80);
+  y += 2;
+
+  // Tags
+  if (n.tags && n.tags.length) {
+    drawWrappedText('Tags: ' + n.tags.join(', '), 11, false, 100, 100, 140);
+    y += 2;
+  }
+
+  // Divider
+  doc.setDrawColor(180, 180, 220);
+  doc.setLineWidth(0.8);
+  doc.line(margin, y, pageW - margin, y);
+  y += 14;
+
+  // Content
+  var rawContent = ((n && n.content) ? n.content : '').toString().trim();
+  var hasRealText = rawContent && rawContent !== '[Visual Map]';
+
+  if (hasRealText) {
+    var paragraphs = rawContent.split('\n');
+    paragraphs.forEach(function(para) {
+      var t = para.trim();
+      if (!t) { y += 8; return; }
+      drawWrappedText(t, 12, false, 30, 30, 30);
+      y += 4;
+    });
+  } else {
+    drawWrappedText('[No text content — visual map note]', 12, false, 150, 150, 150);
+  }
+
+  // Drawing
+  if (n.drawing) {
+    y += 12;
+    checkPageBreak(30);
+    drawWrappedText('Visual Sketch:', 12, true, 20, 20, 80);
+    y += 6;
+    try {
+      var imgProps = doc.getImageProperties(n.drawing);
+      var ratio = imgProps.width / imgProps.height;
+      var imgW = Math.min(contentWidth, 480);
+      var imgH = imgW / ratio;
+      checkPageBreak(imgH + 10);
+      doc.addImage(n.drawing, 'PNG', margin, y, imgW, imgH);
+      y += imgH + 10;
+    } catch(e) {
+      drawWrappedText('[Visual sketch could not be embedded]', 11, false, 180, 80, 80);
+    }
+  }
+
+  // Footer on every page
+  var totalPages = doc.internal.getNumberOfPages();
+  for (var i = 1; i <= totalPages; i++) {
+    doc.setPage(i);
+    doc.setFontSize(9);
+    doc.setTextColor(160, 160, 160);
+    doc.text(
+      'Exported ' + new Date().toLocaleDateString() + '  •  Page ' + i + ' of ' + totalPages,
+      margin, pageH - 18
+    );
+  }
+
+  doc.save(((n.subject || 'note').replace(/[^a-z0-9]/gi, '_')) + '.pdf');
 };
+
+
+// =============================
+// Flashcards removed from UI
+// (kept JS code for now)
+// =============================
+
+
+let currentStudyNoteId = null;
+let currentStudyCardIndex = 0;
+let currentStudyCards = [];
+let currentStudyRevealed = false;
+
+function _flashKey(noteId){ return `flashcards:${noteId}`; }
+function _progressKey(noteId){ return `flashcardsProgress:${noteId}`; }
+
+function _safeText(s){
+  return (s ?? '').toString();
+}
+
+function _splitToCandidates(text){
+  const t = _safeText(text).replace(/\r/g,'').trim();
+  if(!t) return [];
+
+  // prefer bullet/line items
+  const lines = t.split('\n').map(x=>x.trim()).filter(Boolean);
+  let candidates = [];
+
+  // If it looks like a bullet list, use lines
+  if(lines.length >= 3){
+    candidates = lines;
+  } else {
+    // otherwise split by sentences
+    candidates = t.split(/(?<=[.!?])\s+/).map(x=>x.trim()).filter(Boolean);
+  }
+
+  // remove very short noise
+  candidates = candidates.filter(x => x.length >= 6);
+  return candidates;
+}
+
+function _generateCardsFromNote(note){
+  const content = _safeText(note?.content);
+  const subject = _safeText(note?.subject);
+  const topic = _safeText(note?.topic);
+
+  if(!content || content.trim() === '' || content.trim() === '[Visual Map]') return [];
+
+  const candidates = _splitToCandidates(content);
+  if(candidates.length === 0) return [];
+
+  // Turn each candidate into a short Q/A.
+  // Keep Q short; A is candidate (trimmed).
+  const cards = candidates.slice(0, 10).map((c, idx) => {
+    let q = c;
+
+    // heuristic: try to create questions
+    // If it starts with “X is/are/means” make “What is X?”
+    const m = c.match(/^([^\s].{0,80}?)\s+(is|are|means|refers to)\b/i);
+    if(m && m[1]){
+      q = `What is ${m[1].replace(/[,.;:]+$/,'').trim()}?`;
+    } else {
+      q = `Explain: ${c.length > 80 ? c.slice(0,80).trim() + '…' : c}`;
+    }
+
+    const a = c.length > 220 ? c.slice(0,220).trim() + '…' : c;
+    return {
+      id: `${note.id || 'note'}:${idx}`,
+      q,
+      a
+    };
+  });
+
+  // If we have topic/subject, add one contextual card if content is too sparse
+  if(cards.length < 5 && (topic || subject)){
+    const ctx = [subject && `Subject: ${subject}`, topic && `Topic: ${topic}`].filter(Boolean).join(' | ');
+    if(ctx){
+      cards.unshift({ id: `${note.id || 'note'}:ctx`, q: `What are the key ideas about ${topic || subject}?`, a: ctx });
+    }
+  }
+
+  return cards;
+}
+
+function _loadProgress(noteId){
+  try {
+    return JSON.parse(localStorage.getItem(_progressKey(noteId)) || 'null') || {};
+  } catch{
+    return {};
+  }
+}
+
+function _saveProgress(noteId, progress){
+  localStorage.setItem(_progressKey(noteId), JSON.stringify(progress || {}));
+}
+
+function _scheduleNext(nowMs, current){
+  // current: { intervalMs, nextDueMs, lapses }
+  const intervalMs = current?.intervalMs ?? 0;
+
+  // last-minute friendly defaults
+  if(!intervalMs || intervalMs <= 0){
+    if(current?.lastRating === 'again') intervalMs = 2 * 60 * 1000;
+    else intervalMs = 10 * 60 * 1000;
+  }
+
+  return intervalMs;
+}
+
+function _applyRating(noteId, cardIdx, rating){
+  const now = Date.now();
+  const cards = currentStudyCards;
+  const card = cards[cardIdx];
+  if(!card) return;
+
+  const progress = _loadProgress(noteId);
+  const cardKey = card.id || String(cardIdx);
+  const cur = progress[cardKey] || { intervalMs: 0, nextDueMs: now, lastRating: null };
+
+  let nextDueMs = now;
+  let intervalMs = cur.intervalMs || 0;
+
+  if(rating === 'again'){
+    intervalMs = Math.max(60 * 1000, (intervalMs ? intervalMs * 0.2 : 2 * 60 * 1000));
+    nextDueMs = now + intervalMs;
+  } else if(rating === 'good'){
+    // grow interval
+    intervalMs = Math.max(10 * 60 * 1000, intervalMs ? intervalMs * 1.8 : 6 * 60 * 60 * 1000);
+    nextDueMs = now + intervalMs;
+  } else if(rating === 'easy'){
+    intervalMs = Math.max(24 * 60 * 60 * 1000, intervalMs ? intervalMs * 2.6 : 24 * 60 * 60 * 1000);
+    nextDueMs = now + intervalMs;
+  }
+
+  progress[cardKey] = {
+    intervalMs,
+    nextDueMs,
+    lastRating: rating,
+    updatedAtMs: now
+  };
+
+  _saveProgress(noteId, progress);
+  return progress;
+}
+
+function openStudy(noteId){
+  currentStudyNoteId = noteId;
+  currentStudyCardIndex = 0;
+  currentStudyRevealed = false;
+
+  const saved = localStorage.getItem(_flashKey(noteId));
+  const noteTextContent = saved ? saved : null;
+
+  if(!saved){
+    makeFlashcards(noteId);
+    // makeFlashcards will set the modal UI
+    return;
+  }
+
+  try {
+    currentStudyCards = JSON.parse(saved) || [];
+  } catch{
+    currentStudyCards = [];
+  }
+
+  if(!currentStudyCards.length){
+    makeFlashcards(noteId);
+    return;
+  }
+
+  document.getElementById('flashcards-modal').style.display = 'flex';
+  document.getElementById('flashcards-rating').style.display = 'none';
+
+  // pick the next due card
+  const progress = _loadProgress(noteId);
+  const now = Date.now();
+  let dueIdx = currentStudyCards.findIndex(c => {
+    const key = c.id || '';
+    const p = progress[key];
+    return p && typeof p.nextDueMs === 'number' && p.nextDueMs <= now;
+  });
+
+  if(dueIdx < 0) dueIdx = 0;
+  currentStudyCardIndex = dueIdx;
+  currentStudyRevealed = false;
+
+  const card = currentStudyCards[currentStudyCardIndex];
+  document.getElementById('flashcards-meta').textContent = `Note: ${noteId} • Card ${currentStudyCardIndex+1}/${currentStudyCards.length}`;
+  document.getElementById('flashcards-question').textContent = card.q;
+  document.getElementById('flashcards-answer').textContent = '';
+  document.getElementById('flashcards-reveal').disabled = false;
+  document.getElementById('flashcards-rating').style.display = 'none';
+}
+
+function closeStudy(){
+  document.getElementById('flashcards-modal').style.display = 'none';
+  // keep state in case user reopens quickly
+}
+
+async function makeFlashcards(noteId){
+  currentStudyNoteId = noteId;
+  currentStudyCards = [];
+  currentStudyRevealed = false;
+
+  // fetch note content to generate
+  const r = await apiFetch(`/notes/${noteId}`);
+  if(!r.success || !r.data){
+    alert(r.message || 'Failed to load note');
+    return;
+  }
+
+  const note = r.data;
+  // `get_note` returns {id, subject, topic, content, ...}
+  const cards = _generateCardsFromNote(note);
+
+  if(!cards.length){
+    alert('No readable content to generate flashcards. Add text to the note content (not “[Visual Map]”).');
+    return;
+  }
+
+  localStorage.setItem(_flashKey(noteId), JSON.stringify(cards));
+  // init progress with immediate due so user can study now
+  const progress = {};
+  cards.forEach((c, idx) => {
+    const key = c.id || String(idx);
+    progress[key] = { intervalMs: 0, nextDueMs: Date.now(), lastRating: null };
+  });
+  _saveProgress(noteId, progress);
+
+  currentStudyCards = cards;
+  currentStudyCardIndex = 0;
+
+  document.getElementById('flashcards-modal').style.display = 'flex';
+  document.getElementById('flashcards-rating').style.display = 'none';
+
+  document.getElementById('flashcards-meta').textContent = `Note: ${note.subject || noteId} • ${cards.length} cards`;
+  document.getElementById('flashcards-question').textContent = cards[0].q;
+  document.getElementById('flashcards-answer').textContent = '';
+  document.getElementById('flashcards-reveal').disabled = false;
+  document.getElementById('flashcards-progress').textContent = `Due now: ${cards.length}`;
+}
+
+function revealAnswer(){
+  if(!currentStudyCards.length) return;
+  const card = currentStudyCards[currentStudyCardIndex];
+  document.getElementById('flashcards-answer').textContent = card.a;
+  currentStudyRevealed = true;
+  document.getElementById('flashcards-rating').style.display = 'flex';
+}
+
+function rateCard(rating){
+  if(!currentStudyNoteId || !currentStudyCards.length) return;
+  if(!currentStudyRevealed){
+    // require reveal
+    alert('Reveal the answer before rating.');
+    return;
+  }
+
+  const cardIdx = currentStudyCardIndex;
+  _applyRating(currentStudyNoteId, cardIdx, rating);
+
+  // choose next due card
+  const progress = _loadProgress(currentStudyNoteId);
+  const now = Date.now();
+  let nextIdx = -1;
+
+  for(let i=0;i<currentStudyCards.length;i++){
+    const c = currentStudyCards[i];
+    const key = c.id || String(i);
+    const p = progress[key];
+    if(p && typeof p.nextDueMs === 'number' && p.nextDueMs <= now){
+      nextIdx = i;
+      break;
+    }
+  }
+
+  if(nextIdx < 0){
+    // if none due, move forward cyclically
+    nextIdx = (cardIdx + 1) % currentStudyCards.length;
+  }
+
+  currentStudyCardIndex = nextIdx;
+  currentStudyRevealed = false;
+
+  const card = currentStudyCards[currentStudyCardIndex];
+  document.getElementById('flashcards-meta').textContent = `Note: ${currentStudyNoteId} • Card ${currentStudyCardIndex+1}/${currentStudyCards.length}`;
+  document.getElementById('flashcards-question').textContent = card.q;
+  document.getElementById('flashcards-answer').textContent = '';
+
+  document.getElementById('flashcards-rating').style.display = 'none';
+  document.getElementById('flashcards-reveal').disabled = false;
+
+  // update due count
+  const dueCount = currentStudyCards.reduce((acc, c) => {
+    const key = c.id || '';
+    const p = progress[key];
+    return acc + (p && typeof p.nextDueMs === 'number' && p.nextDueMs <= now ? 1 : 0);
+  }, 0);
+  document.getElementById('flashcards-progress').textContent = `Due now: ${dueCount}`;
+}
 </script>
 </body>
 </html>

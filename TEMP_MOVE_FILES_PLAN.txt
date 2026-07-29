@@ -1,0 +1,21 @@
+Planned cleanup steps (temporary):
+
+1) Move draft/temp artifacts:
+   - TEMP_frontend_notebook.html -> frontend/drafts/TEMP_frontend_notebook.html
+   - TEMP_frontend_notebook_exportpdf.js -> frontend/drafts/TEMP_frontend_notebook_exportpdf.js
+
+2) Draft safe to delete after verifying copies exist:
+   - Original TEMP_frontend_notebook.html
+   - Original TEMP_frontend_notebook_exportpdf.js
+
+3) Duplicate AI pages:
+   - Confirm whether ai_assistant.html and ai-chat.html are duplicates.
+   - Observed: current sidebar links use ai_assistant.html; ai-chat.html does not appear in sidebar.
+   - Decision (default): keep ai_assistant.html; delete ai-chat.html and update any references if found.
+
+4) Update STRUCTURE.md:
+   - Add section 'Draft/Temporary Artifacts'
+   - Document frontend/drafts/ usage and which files are safe to delete after migration.
+
+Note: Tool search for ripgrep is failing, so codebase-wide searches are limited; manual inspection via read_file/list_files used.
+

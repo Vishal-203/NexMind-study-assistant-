@@ -11,10 +11,16 @@ def list_notes(app):
     page = max(page, 1)
     limit = max(min(limit, 50), 1)
 
+    search = request.args.get('q')
     subject = request.args.get('subject')
     topic = request.args.get('topic')
     q = {'user_id': user_id}
-    if subject:
+    if search:
+        q['$or'] = [
+            {'subject': {'$regex': search, '$options': 'i'}},
+            {'topic': {'$regex': search, '$options': 'i'}}
+        ]
+    elif subject:
         q['subject'] = {'$regex': subject, '$options': 'i'}
     if topic:
         q['topic'] = {'$regex': topic, '$options': 'i'}
@@ -22,6 +28,7 @@ def list_notes(app):
     total = app.mongo.db.notes.count_documents(q)
     notes = list(app.mongo.db.notes.find(q)
                  .sort('updated_at', -1)
+
                  .skip((page - 1) * limit)
                  .limit(limit))
     for note in notes:
@@ -58,9 +65,11 @@ def create_note(app):
         'content': content,
         'drawing': drawing,
         'tags': tags,
+        'moderation_status': 'pending',
         'created_at': datetime.utcnow(),
         'updated_at': datetime.utcnow()
     }
+
     note_id = app.mongo.db.notes.insert_one(note).inserted_id
     return resp(True, 'Note created', {'id': str(note_id)})
 

@@ -1,5 +1,6 @@
 from flask import request
 from flask_jwt_extended import jwt_required, get_jwt_identity
+from datetime import datetime, timedelta
 from utils.helpers import check_password, hash_password, parse_object_id, resp
 
 
@@ -71,21 +72,67 @@ def change_password(app):
     return resp(True, 'Password changed successfully')
 
 
+def calculate_streak(app, user_id, user_doc):
+    """Calculate consecutive study days ending today.
+
+    Activity sources:
+    - notes.created_at
+    - tasks.created_at
+    - tasks.completed_at (if present)
+
+    Returns: int streak_count
+    """
+    today = datetime.utcnow().date()
+    active_dates = set()
+
+    # notes.created_at
+    for n in app.mongo.db.notes.find({'user_id': user_id}, {'created_at': 1}):
+        created_at = n.get('created_at')
+        if isinstance(created_at, datetime):
+            active_dates.add(created_at.date())
+
+    # tasks.created_at
+    for t in app.mongo.db.tasks.find({'user_id': user_id}, {'created_at': 1}):
+        created_at = t.get('created_at')
+        if isinstance(created_at, datetime):
+            active_dates.add(created_at.date())
+
+    # tasks.completed_at (optional field)
+    for t in app.mongo.db.tasks.find({'user_id': user_id}, {'completed_at': 1}):
+        completed_at = t.get('completed_at')
+        if isinstance(completed_at, datetime):
+            active_dates.add(completed_at.date())
+
+    streak = 0
+    d = today
+    while d in active_dates:
+        streak += 1
+        d -= timedelta(days=1)
+
+    return streak
+
+
 @jwt_required()
 def get_user_stats(app):
     """Get user statistics (notes count, tasks count, etc)"""
     user_id = get_jwt_identity()
-    
+
+    user_doc = app.mongo.db.users.find_one({'_id': parse_object_id(user_id, 'user_id')})
+
     notes_count = app.mongo.db.notes.count_documents({'user_id': user_id})
     tasks_count = app.mongo.db.tasks.count_documents({'user_id': user_id})
     completed_tasks = app.mongo.db.tasks.count_documents({'user_id': user_id, 'status': 'completed'})
     pending_tasks = tasks_count - completed_tasks
-    
+
+    streak = calculate_streak(app, user_id, user_doc)
+
     stats = {
         'notes': notes_count,
         'total_tasks': tasks_count,
         'completed_tasks': completed_tasks,
-        'pending_tasks': pending_tasks
+        'pending_tasks': pending_tasks,
+        'study_streak': streak
     }
-    
+
     return resp(True, 'Stats fetched', stats)
+

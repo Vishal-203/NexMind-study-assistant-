@@ -4,27 +4,29 @@
 <meta charset="utf-8" />
 <title>AI Assistant | AI Study Assistant</title>
 <link rel="stylesheet" href="styles.css" />
+<link rel="stylesheet" href="nexmind-redesign.css" />
 </head>
-<body>
+<body class="compact-page">
 <div class="app-container">
-  <aside class="sidebar">
-    <div class="sidebar-logo">
-      <div class="pulse-node" style="width: 12px; height: 12px; background: var(--primary); border-radius: 50%;"></div>
-      <span>Neural Flow</span>
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-header" aria-label="AI Study Assistant">
+      <a href="dashboard.html" aria-label="Go to dashboard" style="display:flex; align-items:center; gap:10px; text-decoration:none; color:inherit;">
+        <img class="sidebar-logo__img brand-logo--neon" src="assets/study-logo-theme.png" alt="" aria-hidden="true" />
+<span class="sidebar-logo__text">NextMind</span>
+      </a>
     </div>
     <nav class="nav-links">
-      <a href="dashboard.html"><span>📊</span> Dashboard</a>
-      <a href="notebook.html"><span>📓</span> Notes</a>
-      <a href="ai_assistant.html" class="active"><span>🧠</span> AI Assistant</a>
-      <a href="planner.html"><span>✅</span> Tasks</a>
-      <a href="profile.html"><span>👤</span> Profile</a>
-      <a href="#" id="logout-sidebar"><span>🚪</span> Logout</a>
+      <a href="dashboard.html">Dashboard</a>
+      <a href="notebook.html">Notes</a>
+      <a href="ai_assistant.html" class="active">AI Assistant</a>
+      <a href="planner.html">Tasks</a>
     </nav>
+
   </aside>
 
   <main class="main-content">
     <section class="page-hero">
-      <p class="auth-kicker">Neural Intelligence</p>
+      <p class="auth-kicker">AI Assistant</p>
       <h1>AI Workspace</h1>
       <p class="section-intro">Connect your knowledge nodes and external resources to the core AI engine for deep synthesis.</p>
     </section>
@@ -41,12 +43,12 @@
       </div>
 
       <div class="card">
-        <h3>Node Connection</h3>
+        <h3>Note Connection</h3>
         <p class="section-intro">Select a knowledge node for local context.</p>
         <select id="note-select" class="input-field">
           <option value="">-- No note selected --</option>
         </select>
-        <button class="btn" id="refresh-notes" style="width: 100%;">Refresh Nodes</button>
+        <button class="btn" id="refresh-notes" style="width: 100%;">Refresh Notes</button>
         <p id="note-status" style="font-size:0.8rem; margin-top:0.5rem; color:var(--text-muted);"></p>
       </div>
     </div>
@@ -56,7 +58,15 @@
       <p class="section-intro">Ask questions about your study material. Context will be automatically synthesized.</p>
       <textarea id="question" class="input-field" rows="3" placeholder="Analyze knowledge nodes..."></textarea>
       <button class="btn" id="ask-btn">Execute Query</button>
-      <div id="answer" class="result-panel" style="display: none;"></div>
+
+      <div id="answer" class="result-panel" style="display: none;">
+        <div class="result-panel-actions" aria-hidden="true">
+          <button class="result-action-btn" onclick="copyResult('answer')">Copy</button>
+          <button class="result-action-btn" onclick="editResult('answer')">Edit</button>
+        </div>
+        <div id="answer-content" class="result-content"></div>
+      </div>
+
     </div>
 
     <div class="grid-2">
@@ -69,7 +79,14 @@
           <button class="btn btn-secondary" id="summarize-file-btn">Summarize File</button>
           <button class="btn btn-secondary" id="summarize-note-btn">Summarize Node</button>
         </div>
-        <div id="summary" class="result-panel" style="display: none;"></div>
+        <div id="summary" class="result-panel" style="display: none;">
+          <div class="result-panel-actions" aria-hidden="true">
+            <button class="result-action-btn" onclick="copyResult('summary')">Copy</button>
+            <button class="result-action-btn" onclick="editResult('summary')">Edit</button>
+          </div>
+          <div id="summary-content" class="result-content"></div>
+        </div>
+
       </div>
 
       <div class="card">
@@ -77,24 +94,47 @@
         <p class="section-intro">Generate active recall metrics for any topic.</p>
         <input id="quiz-topic" class="input-field" placeholder="Enter topic for evaluation" />
         <button class="btn" id="quiz-btn" style="width: 100%;">Generate Evaluation</button>
-        <pre id="quiz" style="background: rgba(0,0,0,0.3); padding: 1rem; border-radius: 8px; margin-top: 1rem; font-family: monospace; white-space: pre-wrap; display: none;"></pre>
+        <pre id="quiz" style="background: rgba(0,0,0,0.3); padding: 0.85rem; border-radius: 8px; margin-top: 0.75rem; font-family: monospace; white-space: pre-wrap; display: none;"></pre>
       </div>
     </div>
   </main>
 </div>
 
+<button class="ask-ai-btn" onclick="openChatWidget()">Ask AI</button>
+
+<button class="profile-float-btn" type="button" onclick="window.location.href='profile.html'">
+  <span class="profile-float-btn__icon" aria-hidden="true">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <path d="M12 12c2.485 0 4.5-2.239 4.5-5S14.485 2 12 2 7.5 4.239 7.5 7s2.015 5 4.5 5Z" fill="currentColor"/>
+      <path d="M4 22c0-4.418 3.582-8 8-8s8 3.582 8 8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+    </svg>
+  </span>
+  <span class="profile-float-btn__label">Profile</span>
+</button>
+
+<!-- Chat Widget -->
+<div id="chat-widget" class="chat-widget">
+  <div class="chat-widget-header">
+    <div class="chat-widget-title">AI Assistant</div>
+    <div class="chat-widget-controls">
+      <button onclick="minimizeChatWidget()">_</button>
+      <button onclick="closeChatWidget()">×</button>
+    </div>
+  </div>
+  <div id="chat-messages" class="chat-messages"></div>
+  <div class="chat-input-area">
+    <input type="text" id="chat-input" placeholder="Type a message..." />
+    <button id="chat-send-btn" onclick="sendChatMessage()">Send</button>
+  </div>
+</div>
+
 <script src="app.js"></script>
 <script src="neural-bg.js"></script>
+<script src="chat-widget.js"></script>
 <script>
 requireAuth();
 initDarkMode();
 
-document.getElementById('logout-sidebar').onclick = (e) => {
-  e.preventDefault();
-  clearToken();
-  localStorage.removeItem('user');
-  window.location = 'index.html';
-};
 
 async function display(eid, endpoint, payload, btn){
   const out = document.getElementById(eid);
@@ -103,25 +143,151 @@ async function display(eid, endpoint, payload, btn){
     btn.dataset.originalText = btn.textContent;
     btn.textContent = 'Processing...';
   }
+
   out.style.display = 'none';
-  out.textContent = '';
-  
+
+  // Prefer dedicated content container if present.
+  const contentEl = document.getElementById(eid + '-content');
+  if (contentEl) contentEl.innerHTML = '';
+  else out.textContent = '';
+
   const res = await apiFetch(endpoint, 'POST', payload);
   if (btn) {
     btn.disabled = false;
     btn.textContent = btn.dataset.originalText;
   }
-  
+
   if(!res.success){ 
-    out.innerHTML = `<span style="color:var(--badge-danger)">${res.message}</span>`; 
+    const msgHtml = `<span style="color:var(--badge-danger)">${res.message}</span>`;
+    if (contentEl) contentEl.innerHTML = msgHtml;
+    else out.innerHTML = msgHtml;
     out.style.display = 'block';
     return; 
   }
-  
+
   const data = res.data.answer || res.data.summary || res.data.quiz;
-  out.textContent = data;
+
+  // Render possible code blocks/inline code while keeping spacing and line order.
+  if (contentEl) {
+    contentEl.style.whiteSpace = 'pre-wrap';
+    contentEl.innerHTML = renderAiTextToHtml(data);
+  } else {
+    out.style.whiteSpace = 'pre-wrap';
+    out.innerHTML = renderAiTextToHtml(data);
+  }
+
   out.style.display = 'block';
 }
+
+async function copyResult(eid) {
+  const out = document.getElementById(eid);
+  if (!out) return;
+
+  const contentEl = document.getElementById(eid + '-content');
+  const rawText = contentEl ? contentEl.innerText : out.innerText;
+  const text = (rawText || '').trim();
+  if (!text) return;
+
+  await navigator.clipboard.writeText(text);
+}
+
+function editResult(eid) {
+  const out = document.getElementById(eid);
+  if (!out) return;
+
+  const contentEl = document.getElementById(eid + '-content');
+  const currentText = contentEl ? contentEl.innerText : out.innerText;
+  const text = (currentText || '').trim();
+
+  if (contentEl) {
+    contentEl.innerHTML = '';
+    const ta = document.createElement('textarea');
+    ta.style.width = '100%';
+    ta.style.minHeight = '180px';
+    ta.value = text;
+    ta.className = 'input-field';
+    contentEl.appendChild(ta);
+
+    const saveBtn = document.createElement('button');
+    saveBtn.className = 'btn';
+    saveBtn.style.marginTop = '0.75rem';
+    saveBtn.textContent = 'Save';
+    saveBtn.onclick = () => {
+      const editedText = ta.value.trim();
+
+      // Transfer edited output into Notes as a new note draft.
+      // NOTE: we pass content via query params; notebook.html will prefill.
+      const subjectGuess = (editedText.split('\n').find(l => l.trim()) || 'AI Note').slice(0, 60);
+      const topicGuess = 'AI Assistant';
+
+      const toParam = (s) => encodeURIComponent(String(s || ''));
+      const qs = `subject=${toParam(subjectGuess)}&topic=${toParam(topicGuess)}&content=${toParam(editedText)}`;
+
+      window.location.href = `notebook.html?${qs}`;
+    };
+
+    contentEl.appendChild(saveBtn);
+  }
+}
+
+
+function escapeHtml(text) {
+  const div = document.createElement('div');
+  div.textContent = text;
+  return div.innerHTML;
+}
+
+// Supports:
+// - fenced code blocks: ```lang\ncode``` -> <pre><code>...</code></pre>
+// - inline code: `code` -> <code>code</code>
+// - preserves whitespace/line order
+function renderAiTextToHtml(text) {
+  if (text === null || text === undefined) return '';
+  const raw = String(text);
+
+  // Split by fenced code blocks while keeping them in the result.
+  const parts = raw.split(/```[a-zA-Z0-9_-]*\n[\s\S]*?```/g);
+  const fenceRe = /```[a-zA-Z0-9_-]*\n([\s\S]*?)```/g;
+
+  // If there are no fences, just handle inline code + basic escaping.
+  if (!fenceRe.test(raw)) {
+    fenceRe.lastIndex = 0;
+    return escapeHtml(raw).replace(/`([^`]+)`/g, '<code>$1</code>');
+  }
+
+  fenceRe.lastIndex = 0;
+  const segments = [];
+  let lastIndex = 0;
+  let m;
+  while ((m = fenceRe.exec(raw)) !== null) {
+    const fullMatch = m[0];
+    const code = m[1];
+
+    // text before fence
+    const before = raw.slice(lastIndex, m.index);
+    if (before) {
+      segments.push(
+        escapeHtml(before).replace(/`([^`]+)`/g, '<code>$1</code>')
+      );
+    }
+
+    // fenced code block
+    segments.push(
+      `<pre><code>${escapeHtml(code)}</code></pre>`
+    );
+
+    lastIndex = m.index + fullMatch.length;
+  }
+
+  // tail text after last fence
+  const tail = raw.slice(lastIndex);
+  if (tail) {
+    segments.push(escapeHtml(tail).replace(/`([^`]+)`/g, '<code>$1</code>'));
+  }
+
+  return segments.join('');
+}
+
 
 async function loadFileOptions() {
   const select = document.getElementById('file-select');
@@ -159,6 +325,16 @@ async function loadNoteOptions() {
   });
   status.textContent = `${items.length} node(s) connected.`;
 }
+
+const questionEl = document.getElementById('question');
+
+questionEl.addEventListener('keydown', (e) => {
+  // Execute query on Enter (Shift+Enter keeps newline behavior)
+  if (e.key === 'Enter' && !e.shiftKey) {
+    e.preventDefault();
+    document.getElementById('ask-btn')?.click();
+  }
+});
 
 document.getElementById('ask-btn').onclick = async function() {
   const q = document.getElementById('question').value.trim();
@@ -203,3 +379,4 @@ loadNoteOptions();
 </script>
 </body>
 </html>
+

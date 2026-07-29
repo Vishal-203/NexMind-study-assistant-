@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Review Notes | Admin | AI Study Assistant</title>
+<link rel="stylesheet" href="../styles.css" />
+<link rel="stylesheet" href="admin-styles.css" />
+</head>
+<body class="admin-page">
+<div class="app-container">
+<aside class="sidebar">
+    <div class="sidebar-logo" aria-label="AI Study Assistant">
+      <img class="sidebar-logo__img" src="../assets/study-logo-theme.png" alt="" aria-hidden="true" />
+<span class="sidebar-logo__text">NextMind</span>
+
+
+    </div>
+    <nav class="nav-links sidebar-nav">
+      <a href="admin-dashboard.html">Dashboard</a>
+      <a href="admin-dashboard.html#users">Users</a>
+      <a href="admin-dashboard.html#content" class="active">Content</a>
+      <a href="admin-dashboard.html#analytics">Analytics</a>
+      <a href="admin-profile.html">Profile</a>
+
+    </nav>
+
+
+  </aside>
+
+  <main class="main-content">
+    <section class="page-hero admin-hero">
+      <p class="auth-kicker">Admin Control Center</p>
+      <h1>Review Notes</h1>
+      <p class="section-intro">This page is wired from Content moderation quick links.</p>
+    </section>
+
+    <div class="card admin-section">
+      <h3>Pending Notes</h3>
+      <p class="section-intro">Review and approve/reject notes waiting for moderation.</p>
+
+      <div class="admin-action-grid" style="margin-top:1rem;">
+        <button class="btn" type="button" id="refresh-notes-btn">Refresh</button>
+        <button class="btn btn-secondary" type="button" onclick="window.location.href='admin-dashboard.html#content'">Back to Content</button>
+      </div>
+
+      <div style="margin-top:1rem;" id="pending-notes-container">
+        <p class="section-intro">Loading pending notes...</p>
+      </div>
+    </div>
+
+    <div id="admin-toast" class="admin-toast" style="display:none;"></div>
+
+  </main>
+</div>
+
+<script src="../app.js"></script>
+<script>
+  requireAuth();
+  initDarkMode();
+
+  const toastEl = document.getElementById('admin-toast');
+
+  function showToast(message, type='success') {
+    if (!toastEl) return;
+    toastEl.style.display = 'block';
+    toastEl.textContent = message;
+    toastEl.style.position = 'fixed';
+    toastEl.style.right = '1.25rem';
+    toastEl.style.bottom = '1.25rem';
+    toastEl.style.zIndex = '9999';
+    toastEl.style.maxWidth = '520px';
+    toastEl.style.padding = '0.85rem 1rem';
+    toastEl.style.borderRadius = '12px';
+    toastEl.style.backdropFilter = 'blur(10px)';
+    toastEl.style.border = type === 'success' ? '1px solid rgba(102,255,242,0.30)' : '1px solid rgba(239,83,80,0.34)';
+    toastEl.style.backgroundColor = type === 'success' ? 'rgba(6,14,26,0.85)' : 'rgba(26,6,6,0.85)';
+    toastEl.style.color = type === 'success' ? 'rgba(102,255,242,0.95)' : '#FF8A80';
+    toastEl.style.boxShadow = '0 18px 45px rgba(0,0,0,0.45)';
+    toastEl.style.animation = 'fadeIn 0.18s ease';
+    clearTimeout(showToast._t);
+    showToast._t = setTimeout(()=>{ toastEl.style.display = 'none'; toastEl.textContent=''; }, 3600);
+  }
+
+  function preview(text, maxLen=120) {
+    const t = (text ?? '');
+    if (!t) return '—';
+    return t.length > maxLen ? t.slice(0, maxLen) + '…' : t;
+  }
+
+  function pendingNotesCard(note) {
+    const created = note.created_at ? new Date(note.created_at).toLocaleString() : '—';
+    const title = note.subject;
+    const content = note.content;
+    const userId = note.user_id;
+
+    return `
+      <div class="card" style="margin-bottom:1rem; padding:1rem 1.1rem; border-left:4px solid var(--primary);">
+        <div style="display:flex; justify-content:space-between; gap:1rem; align-items:flex-start;">
+          <div style="min-width:0;">
+            <div style="font-weight:900; margin-bottom:0.25rem; word-break:break-word;">${title}</div>
+            <div style="font-size:0.82rem; color:var(--text-muted); margin-bottom:0.35rem;">
+              ${preview(content, 140)}
+            </div>
+            <div style="font-size:0.78rem; color:var(--text-muted);">
+              Creator: <span style="color:rgba(244,244,245,0.82); font-weight:700;">${userId}</span>
+              <span style="opacity:0.6;"> · </span>
+              Created: ${created}
+            </div>
+          </div>
+          <div style="display:flex; flex-direction:column; gap:0.5rem; flex-shrink:0;">
+            <button class="btn" type="button" onclick="approveNote('${note.id}')">Approve</button>
+            <button class="btn btn-secondary" type="button" onclick="rejectNote('${note.id}')">Reject</button>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  async function loadPendingNotes() {
+    const container = document.getElementById('pending-notes-container');
+    const refreshBtn = document.getElementById('refresh-notes-btn');
+    if (!container) return;
+
+    if (refreshBtn) {
+      refreshBtn.disabled = true;
+      refreshBtn.textContent = 'Refreshing...';
+    }
+
+    container.innerHTML = '<p class="section-intro">Loading pending notes...</p>';
+
+const res = await apiFetch('/auth/moderation/notes', 'GET');
+
+    if (refreshBtn) {
+      refreshBtn.disabled = false;
+      refreshBtn.textContent = 'Refresh';
+    }
+
+    if (!res || !res.success) {
+      container.innerHTML = `<p class="section-intro" style="color: var(--text-muted);">Unable to load pending notes.</p>`;
+      showToast(res?.message || 'Unable to load pending notes.', 'error');
+      return;
+    }
+
+    const items = res.data?.items || [];
+    if (items.length === 0) {
+      container.innerHTML = '<p class="section-intro">No pending notes.</p>';
+      return;
+    }
+
+    container.innerHTML = items.map(pendingNotesCard).join('');
+  }
+
+  window.approveNote = async function(noteId) {
+const res = await apiFetch(`/auth/moderation/notes/${noteId}/approve`, 'PUT');
+    if (!res || !res.success) {
+      showToast(res?.message || 'Unable to approve note.', 'error');
+      return;
+    }
+    showToast('Note approved successfully.', 'success');
+    await loadPendingNotes();
+  };
+
+  window.rejectNote = async function(noteId) {
+const res = await apiFetch(`/auth/moderation/notes/${noteId}`, 'DELETE');
+    if (!res || !res.success) {
+      showToast(res?.message || 'Unable to reject note.', 'error');
+      return;
+    }
+    showToast('Note rejected successfully.', 'success');
+    await loadPendingNotes();
+  };
+
+  const refreshBtn = document.getElementById('refresh-notes-btn');
+  if (refreshBtn) refreshBtn.onclick = loadPendingNotes;
+
+  loadPendingNotes();
+</script>
+
+</body>
+</html>
+
+
+

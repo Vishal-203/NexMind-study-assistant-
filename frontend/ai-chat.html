@@ -1,0 +1,267 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>AI Chat | AI Study Assistant</title>
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="nexmind-redesign.css" />
+</head>
+<body class="compact-page">
+  <div class="app-container">
+    <aside id="sidebar" class="sidebar">
+      <div class="sidebar-header" aria-label="AI Study Assistant">
+<img class="sidebar-logo__img brand-logo--neon" src="assets/study-logo-theme.png" alt="" aria-hidden="true" />
+<span class="sidebar-logo__text">NextMind</span>
+      </div>
+      <nav class="nav-links">
+        <a href="dashboard.html">Dashboard</a>
+        <a href="notebook.html">Notes</a>
+        <a href="ai_assistant.html" class="active">AI Assistant</a>
+        <a href="planner.html">Tasks</a>
+      </nav>
+
+    </aside>
+
+    <main class="main-content">
+      <section class="page-hero">
+        <p class="auth-kicker">AI Conversation</p>
+        <h1>Chat with AI</h1>
+        <p class="section-intro">Ask questions about your study material. Context can be used from your notes when available.</p>
+
+        <div class="card" style="margin-top: 1.25rem; padding: 1rem;">
+          <div style="display:flex; justify-content:space-between; align-items:center; gap:0.75rem; flex-wrap:wrap;">
+            <div>
+              <h3 style="margin:0 0 0.25rem 0;">Conversation</h3>
+              <p class="section-intro" style="margin:0; max-width:none;">Enter a message and press Send.</p>
+            </div>
+            <button class="btn btn-secondary" style="padding:0.65rem 1rem;" id="clear-chat-btn">Clear</button>
+          </div>
+
+          <div class="chat-page" style="margin-top: 1rem;">
+            <div id="chat-messages-page" class="chat-messages" style="height: 60vh; overflow-y:auto; border-radius: var(--radius); border: 1px solid rgba(255,255,255,0.12); background: rgba(0,0,0,0.22);"></div>
+
+            <div class="chat-input-area" style="border-radius: var(--radius); margin-top: 0.9rem;">
+              <input type="text" id="chat-input-page" placeholder="Type a message..." />
+              <button id="chat-send-btn-page">Send</button>
+            </div>
+
+            <div id="chat-error" style="display:none; margin-top:0.75rem; padding:0.75rem 0.9rem; border-radius: 12px; border: 1px solid rgba(239,68,68,0.35); background: rgba(239,68,68,0.08); color: rgba(255,255,255,0.92);"></div>
+          </div>
+        </div>
+      </section>
+    </main>
+</div>
+
+<button class="profile-float-btn" type="button" onclick="window.location.href='profile.html'">
+  <span class="profile-float-btn__icon" aria-hidden="true">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <path d="M12 12c2.485 0 4.5-2.239 4.5-5S14.485 2 12 2 7.5 4.239 7.5 7s2.015 5 4.5 5Z" fill="currentColor"/>
+      <path d="M4 22c0-4.418 3.582-8 8-8s8 3.582 8 8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+    </svg>
+  </span>
+  <span class="profile-float-btn__label">Profile</span>
+</button>
+
+<script src="app.js"></script>
+
+  <script src="neural-bg.js"></script>
+  <script src="chat-widget.js"></script>
+  <script>
+    // Ensure auth + theme
+    // FIX: if the user lands on this page with auth JS that isn't loaded yet,
+    // wrap in a try to avoid silently breaking the chat UI.
+    try {
+      requireAuth();
+      initDarkMode();
+    } catch (e) {
+      console.error('Auth/theme init failed', e);
+    }
+
+
+
+
+    const messagesEl = document.getElementById('chat-messages-page');
+    const inputEl = document.getElementById('chat-input-page');
+    const sendBtn = document.getElementById('chat-send-btn-page');
+    const clearBtn = document.getElementById('clear-chat-btn');
+    const errorEl = document.getElementById('chat-error');
+
+    function showError(msg) {
+      if (!errorEl) return;
+      errorEl.textContent = msg;
+      errorEl.style.display = 'block';
+    }
+
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    // Minimal markdown-ish renderer for AI responses.
+    // The backend/model may return HTML-ish output (like <br/>, &nbsp;, <ul>/<ol>).
+    // We normalize those back into plain newlines before converting to our own HTML.
+    // - preserves newlines
+    // - supports numbered lists (1. item)
+    // - supports bullet lists (- item / * item)
+    // - supports inline code with backticks
+    // - supports fenced code blocks ```...``` (rendered as <pre><code>)
+    function renderMarkdownish(text) {
+      if (text === null || text === undefined) return '';
+      let raw = String(text);
+
+      // Backend/model may return HTML-ish output (<br/>, &nbsp;, <ul>/<ol>, etc.).
+      // Convert the most common separators back to plain newlines so our renderer works.
+      raw = raw.replace(/<br\s*\/?>/gi, '\n');
+      raw = raw.replace(/&nbsp;/gi, ' ');
+      raw = raw.replace(/<\/?ul>/gi, '');
+      raw = raw.replace(/<\/?ol>/gi, '');
+      raw = raw.replace(/<\/?li>/gi, '');
+
+      // Fenced code blocks first
+      const fenceRe = /```[a-zA-Z0-9_-]*\n([\s\S]*?)```/g;
+      let out = '';
+      let last = 0;
+      let m;
+      while ((m = fenceRe.exec(raw)) !== null) {
+        const before = raw.slice(last, m.index);
+        if (before) out += renderMarkdownish._renderInlineAndLists(before);
+        const code = m[1] || '';
+        out += `<pre><code>${escapeHtml(code)}</code></pre>`;
+        last = m.index + m[0].length;
+      }
+      const tail = raw.slice(last);
+      out += renderMarkdownish._renderInlineAndLists(tail);
+      return out;
+    }
+
+    renderMarkdownish._renderInlineAndLists = function (chunk) {
+      const safe = escapeHtml(chunk);
+
+      // Inline code: `code`
+      let html = safe.replace(/`([^`]+)`/g, '<code>$1</code>');
+
+      // Split into lines to process lists
+      const lines = html.split(/\r?\n/);
+      const blocks = [];
+      let i = 0;
+      while (i < lines.length) {
+        const line = lines[i].trim();
+
+        // Numbered list
+        const numMatch = line.match(/^(\d+)\.\s+(.*)$/);
+        if (numMatch) {
+          const items = [];
+          while (i < lines.length) {
+            const l = lines[i].trim();
+            const mm = l.match(/^(\d+)\.\s+(.*)$/);
+            if (!mm) break;
+            items.push(mm[2]);
+            i++;
+          }
+          blocks.push(`<ol><li>${items.join('</li><li>')}</li></ol>`);
+          continue;
+        }
+
+        // Bullet list
+        const bulletMatch = line.match(/^[-*]\s+(.*)$/);
+        if (bulletMatch) {
+          const items = [];
+          while (i < lines.length) {
+            const l = lines[i].trim();
+            const mm = l.match(/^[-*]\s+(.*)$/);
+            if (!mm) break;
+            items.push(mm[1]);
+            i++;
+          }
+          blocks.push(`<ul><li>${items.join('</li><li>')}</li></ul>`);
+          continue;
+        }
+
+        // Normal paragraph line (preserve blank lines)
+        blocks.push(line === '' ? '&nbsp;' : line);
+        i++;
+      }
+
+      // Convert blocks back to HTML with <br> between non-list blocks
+      // If we already have list HTML, keep it separated.
+      return blocks.join('<br/>');
+    };
+
+    function addMessage(sender, text) {
+
+      if (!messagesEl) return;
+      const div = document.createElement('div');
+      div.className = 'chat-message chat-message-' + sender;
+
+      const timestamp = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      div.innerHTML =
+        '<div class="chat-message-content">' + (sender === 'ai' ? renderMarkdownish(text) : escapeHtml(text)) + '</div>' +
+        '<div class="chat-message-time">' + timestamp + '</div>';
+
+      messagesEl.appendChild(div);
+      messagesEl.scrollTop = messagesEl.scrollHeight;
+    }
+
+    // (Optional) typing indicator helper was removed because the UI already adds Thinking... locally.
+
+    async function sendChat() {
+      const message = (inputEl.value || '').trim();
+      if (!message) return;
+
+      showError('');
+      if (errorEl) errorEl.style.display = 'none';
+
+      addMessage('user', message);
+      inputEl.value = '';
+
+      if (sendBtn) {
+        sendBtn.disabled = true;
+        sendBtn.textContent = '...';
+      }
+
+      // Local thinking line
+      addMessage('ai', 'Thinking...');
+
+      try {
+        const res = await apiFetch('/ai/chat', 'POST', { message: message });
+
+        if (res.success) {
+          const raw = res.data.answer || "I'm ready to help. What would you like to know?";
+          addMessage('ai', renderMarkdownish(raw));
+        } else {
+          showError(res.message || 'AI request failed.');
+        }
+      } catch (e) {
+        showError('Network error. Please check your connection.');
+      } finally {
+
+        if (sendBtn) {
+          sendBtn.disabled = false;
+          sendBtn.textContent = 'Send';
+        }
+        inputEl.focus();
+      }
+    }
+
+    sendBtn.addEventListener('click', sendChat);
+    inputEl.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        sendChat();
+      }
+    });
+
+    clearBtn.addEventListener('click', () => {
+      messagesEl.innerHTML = '';
+      addMessage('ai', 'Hi! Welcome to your study chat. How can I help you today?');
+      inputEl.focus();
+    });
+
+    // Initial greeting
+    addMessage('ai', 'Hi! Welcome to your study chat. How can I help you today?');
+  </script>
+</body>
+</html>
+

@@ -1,0 +1,600 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Admin Dashboard | NextMind</title>
+<link rel="stylesheet" href="../styles.css" />
+<link rel="stylesheet" href="admin-styles.css" />
+</head>
+<body class="admin-page">
+<div class="app-container">
+  <aside class="sidebar">
+<div class="sidebar-logo" aria-label="AI Study Assistant">
+      <img class="sidebar-logo__img brand-logo--neon" src="../assets/study-logo-theme.png" alt="" aria-hidden="true" />
+<span class="sidebar-logo__text">NextMind</span>
+    </div>
+    <nav class="nav-links sidebar-nav">
+      <a href="#dashboard" class="active">Dashboard</a>
+      <a href="#users">Users</a>
+      <a href="#content">Content</a>
+      <a href="#analytics">Analytics</a>
+      <a href="admin-profile.html">Profile</a>
+
+    </nav>
+
+
+  </aside>
+
+  <main class="main-content">
+    <section class="page-hero admin-hero">
+      <p class="auth-kicker">Admin Control Center</p>
+      <h1 id="admin-hero-title">Platform overview</h1>
+      <p class="section-intro" id="admin-hero-copy">Manage users, monitor content, and review system health for your AI Study Assistant.</p>
+
+      <button type="button" class="btn btn-secondary" id="refresh-stats-btn" style="margin-top: 1rem;">Refresh Data</button>
+    </section>
+
+
+    <div id="dashboard-section" class="admin-panel-section active">
+      <div class="grid-3 admin-metric-grid">
+        <div class="card admin-metric-card">
+          <p class="auth-kicker">Users</p>
+          <h2 id="admin-total-users">0</h2>
+          <p class="section-intro">Total registered accounts</p>
+        </div>
+        <div class="card admin-metric-card">
+          <p class="auth-kicker">Active Today</p>
+          <h2 id="admin-active-users">0</h2>
+          <p class="section-intro">Users active in the last 24 hours</p>
+        </div>
+        <div class="card admin-metric-card">
+          <p class="auth-kicker">Notes</p>
+          <h2 id="admin-total-notes">0</h2>
+          <p class="section-intro">Knowledge notes created</p>
+        </div>
+        <div class="card admin-metric-card">
+          <p class="auth-kicker">Tasks</p>
+          <h2 id="admin-total-tasks">0</h2>
+          <p class="section-intro">Tasks across the platform</p>
+        </div>
+        <div class="card admin-metric-card">
+          <p class="auth-kicker">Shared Notes</p>
+          <h2 id="admin-shared-notes">0</h2>
+          <p class="section-intro">Notes shared with other users</p>
+        </div>
+        <div class="card admin-metric-card">
+          <p class="auth-kicker">Blocked Accounts</p>
+          <h2 id="admin-blocked-users">0</h2>
+          <p class="section-intro">Users currently blocked</p>
+        </div>
+      </div>
+    </div>
+
+    <div id="users-section" class="admin-panel-section">
+      <div class="card admin-section">
+        <div class="page-header">
+          <div>
+            <h3>User overview</h3>
+            <p class="section-intro">Recent signups and account status.</p>
+          </div>
+        </div>
+        <div id="admin-user-details" class="user-details-card" style="display:none; margin-bottom:1rem; padding:1.5rem;">
+          <div class="page-header">
+            <div>
+              <h3>User details</h3>
+              <p class="section-intro">Click "View" to inspect a user, then remove or block as needed.</p>
+            </div>
+          </div>
+          <div class="detail-grid">
+            <div><strong>Name:</strong> <span id="detail-name">—</span></div>
+            <div><strong>Email:</strong> <span id="detail-email">—</span></div>
+            <div><strong>Role:</strong> <span id="detail-role">—</span></div>
+            <div><strong>Status:</strong> <span id="detail-status">—</span></div>
+            <div><strong>Joined:</strong> <span id="detail-joined">—</span></div>
+            <div><strong>Last active:</strong> <span id="detail-last-active">—</span></div>
+            <div><strong>AI usage:</strong> <span id="detail-usage">—</span></div>
+          </div>
+        </div>
+        <div class="admin-table-wrapper">
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Role</th>
+                <th>Status</th>
+                <th>Joined</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="admin-user-list">
+              <tr><td colspan="6" style="text-align:center; color: var(--text-muted);">Loading users...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div id="content-section" class="admin-panel-section">
+      <div class="card admin-section">
+        <div class="page-header">
+          <div>
+            <h3>Content controls</h3>
+            <p class="section-intro">Quick links for note and task moderation.</p>
+          </div>
+        </div>
+        <div class="admin-action-grid">
+          <button class="btn" type="button" onclick="window.location.href='review-notes.html'">Review Notes</button>
+
+          <button class="btn btn-secondary" type="button" onclick="window.location.href='review-files.html'">Review Files</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="analytics-section" class="admin-panel-section">
+      <div class="grid-3 admin-metric-grid">
+        <div class="card admin-metric-card">
+          <p class="auth-kicker">New Users</p>
+          <h2>24</h2>
+          <p class="section-intro">Signups over the last 7 days.</p>
+        </div>
+        <div class="card admin-metric-card">
+          <p class="auth-kicker">Note Activity</p>
+          <h2>112</h2>
+          <p class="section-intro">Notes created and updated today.</p>
+        </div>
+        <div class="card admin-metric-card">
+          <p class="auth-kicker">Task Progress</p>
+          <h2>68%</h2>
+          <p class="section-intro">Completion rate across active tasks.</p>
+        </div>
+      </div>
+      <div class="card admin-section" style="margin-top:1.5rem;">
+        <div class="page-header">
+          <div>
+            <h3>Platform performance</h3>
+            <p class="section-intro">Trends: new users, note activity, and task progress.</p>
+          </div>
+        </div>
+
+        <div class="admin-action-grid" style="grid-template-columns: repeat(3, minmax(220px, 1fr));">
+          <div class="setting-card">
+            <h4>New Users (7d)</h4>
+            <div style="display:flex; align-items:center; justify-content:space-between; gap:1rem; margin-bottom:0.5rem;">
+              <p id="admin-new-users-total">—</p>
+              <p id="admin-new-users-last">—</p>
+            </div>
+            <canvas id="chart-new-users" style="width:100%; height:170px;"></canvas>
+          </div>
+
+          <div class="setting-card">
+            <h4>Note Activity (7d)</h4>
+            <div style="display:flex; gap:0.75rem; align-items:center; margin-bottom:0.5rem;">
+              <span class="admin-legend"><span class="admin-legend__dot" style="background:rgba(102,255,242,0.95)"></span>Created</span>
+              <span class="admin-legend"><span class="admin-legend__dot" style="background:rgba(167,139,250,0.95)"></span>Updated</span>
+            </div>
+            <canvas id="chart-note-activity" style="width:100%; height:170px;"></canvas>
+          </div>
+
+          <div class="setting-card">
+            <h4>Task Progress (7d)</h4>
+            <div style="display:flex; align-items:center; justify-content:space-between; gap:1rem; margin-bottom:0.5rem;">
+              <p id="admin-task-progress-last">—</p>
+            </div>
+            <canvas id="chart-task-progress" style="width:100%; height:170px;"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="settings-section" class="admin-panel-section">
+      <div class="card admin-settings-grid">
+        <div class="setting-card">
+          <h4>Access control</h4>
+          <p>Manage roles, user permissions, and block/unblock policies.</p>
+        </div>
+        <div class="setting-card">
+          <h4>Content rules</h4>
+          <p>Configure moderation settings and auto-review behavior for notes.</p>
+        </div>
+        <div class="setting-card">
+          <h4>Platform options</h4>
+          <p>Set default AI limits, notifications, and system preferences.</p>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script src="../app.js"></script>
+<script>
+requireAuth();
+initDarkMode();
+
+function drawBars(canvasId, labels, values, options = {}) {
+  const canvas = document.getElementById(canvasId);
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const w = canvas.width = canvas.clientWidth;
+  const h = canvas.height = Math.floor(canvas.clientHeight);
+
+  ctx.clearRect(0, 0, w, h);
+  const pad = 14;
+  const barCount = Math.max(values.length, 1);
+  const maxVal = Math.max(...values, 1);
+  const gap = Math.max(6, Math.floor((w - pad * 2) / (barCount * 6)));
+  const barW = Math.floor((w - pad * 2 - gap * (barCount - 1)) / barCount);
+
+  // grid
+  ctx.strokeStyle = 'rgba(255,255,255,0.08)';
+  ctx.lineWidth = 1;
+  const gridLines = 4;
+  for (let i = 0; i <= gridLines; i++) {
+    const y = pad + (h - pad * 2) * (i / gridLines);
+    ctx.beginPath();
+    ctx.moveTo(pad, y);
+    ctx.lineTo(w - pad, y);
+    ctx.stroke();
+  }
+
+  // bars
+  const color = options.color || 'rgba(102,255,242,0.95)';
+  ctx.fillStyle = color;
+  ctx.strokeStyle = color;
+  ctx.lineWidth = 1;
+
+  labels.forEach((label, i) => {
+    const v = values[i] ?? 0;
+    const x = pad + i * (barW + gap);
+    const barH = (h - pad * 2) * (v / maxVal);
+    const y = h - pad - barH;
+    const radius = Math.min(10, barW / 2);
+
+    // rounded rect
+    ctx.beginPath();
+    ctx.moveTo(x + radius, y);
+    ctx.arcTo(x + barW, y, x + barW, y + radius, radius);
+    ctx.arcTo(x + barW, y + barH, x + barW - radius, y + barH, radius);
+    ctx.arcTo(x, y + barH, x, y + barH - radius, radius);
+    ctx.arcTo(x, y, x + radius, y, radius);
+    ctx.closePath();
+    ctx.fill();
+    ctx.stroke();
+
+    // label
+    ctx.fillStyle = 'rgba(155,186,205,0.9)';
+    ctx.font = '11px Arial';
+    ctx.textAlign = 'center';
+    const short = (label || '').slice(5); // YYYY-MM-DD -> MM-DD-ish
+    ctx.fillText(short, x + barW / 2, h - 2);
+    ctx.fillStyle = color;
+  });
+}
+
+function drawLineChart(canvasId, labels, series, options = {}) {
+  const canvas = document.getElementById(canvasId);
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const w = canvas.width = canvas.clientWidth;
+  const h = canvas.height = Math.floor(canvas.clientHeight);
+
+  ctx.clearRect(0, 0, w, h);
+  const pad = 14;
+  const allVals = series.flatMap(s => s.values || []);
+  const maxVal = Math.max(...allVals, 1);
+  const gridLines = 4;
+
+  // grid
+  ctx.strokeStyle = 'rgba(255,255,255,0.08)';
+  ctx.lineWidth = 1;
+  for (let i = 0; i <= gridLines; i++) {
+    const y = pad + (h - pad * 2) * (i / gridLines);
+    ctx.beginPath();
+    ctx.moveTo(pad, y);
+    ctx.lineTo(w - pad, y);
+    ctx.stroke();
+  }
+
+  const plotW = w - pad * 2;
+  const plotH = h - pad * 2;
+  const n = Math.max(labels.length, 1);
+  const stepX = plotW / (n - 1 || 1);
+
+  series.forEach((s) => {
+    const color = s.color;
+    const values = s.values || [];
+
+    // line
+    ctx.strokeStyle = color;
+    ctx.fillStyle = color;
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+
+    values.forEach((v, i) => {
+      const x = pad + i * stepX;
+      const y = h - pad - plotH * (v / maxVal);
+      if (i === 0) ctx.moveTo(x, y);
+      else ctx.lineTo(x, y);
+    });
+
+    ctx.stroke();
+
+    // points
+    values.forEach((v, i) => {
+      const x = pad + i * stepX;
+      const y = h - pad - plotH * (v / maxVal);
+      ctx.beginPath();
+      ctx.arc(x, y, 3.5, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = 'rgba(255,255,255,0.25)';
+      ctx.lineWidth = 1;
+      ctx.stroke();
+      ctx.strokeStyle = color;
+    });
+  });
+
+  // x labels (sparse)
+  ctx.fillStyle = 'rgba(155,186,205,0.9)';
+  ctx.font = '11px Arial';
+  ctx.textAlign = 'center';
+  labels.forEach((label, i) => {
+    if (i % 1 !== 0) return;
+    const x = pad + i * stepX;
+    const short = (label || '').slice(5);
+    ctx.fillText(short, x, h - 2);
+  });
+}
+
+async function loadAdminStats() {
+  console.log('Loading admin stats...');
+  try {
+const res = await apiFetch('/auth/admin-stats');
+
+    // Backend responses use keys that exist only if the DB fields match.
+    // Ensure res.data exists before reading charts/metrics.
+    if (!res || typeof res !== 'object' || res.success !== true) {
+      // Keep UI stable; charts will simply not render.
+      console.warn('Admin stats not successful:', res);
+    }
+
+    // In parallel load chart data
+    const [newUsersRes, noteActivityRes, taskProgressRes] = await Promise.all([
+      apiFetch('/auth/analytics/new-users?days=7'),
+      apiFetch('/auth/analytics/note-activity?days=7'),
+      apiFetch('/auth/analytics/task-progress?days=7')
+    ]);
+
+    if (newUsersRes?.success) {
+      const points = newUsersRes.data?.points || [];
+      const labels = points.map(p => p.date);
+      const values = points.map(p => p.count);
+      drawBars('chart-new-users', labels, values, { color: 'rgba(102,255,242,0.95)' });
+      const last = values[values.length - 1] ?? 0;
+      const total = values.reduce((a, b) => a + (b || 0), 0);
+      const elTotal = document.getElementById('admin-new-users-total');
+      const elLast = document.getElementById('admin-new-users-last');
+      if (elTotal) elTotal.textContent = String(total);
+      if (elLast) elLast.textContent = String(last);
+    }
+
+    if (noteActivityRes?.success) {
+      const points = noteActivityRes.data?.points || [];
+      const labels = points.map(p => p.date);
+      const created = points.map(p => p.created);
+      const updated = points.map(p => p.updated);
+      drawLineChart('chart-note-activity', labels, [
+        { name: 'created', color: 'rgba(102,255,242,0.95)', values: created },
+        { name: 'updated', color: 'rgba(167,139,250,0.95)', values: updated }
+      ]);
+    }
+
+    if (taskProgressRes?.success) {
+      const points = taskProgressRes.data?.points || [];
+      const labels = points.map(p => p.date);
+      const completion = points.map(p => p.completion_pct);
+      drawBars('chart-task-progress', labels, completion, { color: 'rgba(167,139,250,0.95)' });
+      const lastPct = completion[completion.length - 1] ?? 0;
+      const el = document.getElementById('admin-task-progress-last');
+      if (el) el.textContent = `Last day: ${lastPct}%`;
+    }
+
+    if (!res.success) {
+      console.error('Admin stats load failed:', res.message);
+      return;
+    }
+
+    document.getElementById('admin-total-users').textContent = res.data.total_users ?? 0;
+    document.getElementById('admin-active-users').textContent = res.data.active_users ?? 0;
+    document.getElementById('admin-total-notes').textContent = res.data.total_notes ?? 0;
+    document.getElementById('admin-total-tasks').textContent = res.data.total_tasks ?? 0;
+    document.getElementById('admin-shared-notes').textContent = res.data.shared_notes ?? 0;
+    document.getElementById('admin-blocked-users').textContent = res.data.blocked_users ?? 0;
+
+    console.log('Admin stats updated successfully');
+  } catch (error) {
+    console.error('Error loading admin stats:', error);
+  }
+}
+
+async function loadAdminUsers() {
+  console.log('Loading admin users...');
+  try {
+    const res = await apiFetch('/auth/admin-users');
+    console.log('Admin users response:', res);
+    
+    const list = document.getElementById('admin-user-list');
+    if (!res.success || !Array.isArray(res.data)) {
+      list.innerHTML = '<tr><td colspan="6" style="text-align:center; color: var(--text-muted);">Unable to load users.</td></tr>';
+      return;
+    }
+
+    if (res.data.length === 0) {
+      list.innerHTML = '<tr><td colspan="6" style="text-align:center; color: var(--text-muted);">No users found.</td></tr>';
+      return;
+    }
+
+    list.innerHTML = res.data.map(user => `
+      <tr>
+        <td>${user.name || '—'}</td>
+        <td>${user.email || '—'}</td>
+        <td>${user.role}</td>
+        <td>${user.is_blocked ? '<span class="admin-badge admin-badge-danger">Blocked</span>' : '<span class="admin-badge admin-badge-success">Active</span>'}</td>
+        <td>${user.created_at ? new Date(user.created_at).toLocaleDateString() : '—'}</td>
+        <td>
+          <button type="button" class="btn btn-secondary" onclick="viewAdminUser('${user.id}')">View</button>
+          <button type="button" class="btn btn-danger" onclick="removeAdminUser('${user.id}')">Remove</button>
+          <button type="button" class="btn btn-secondary" onclick="toggleBlockUser('${user.id}', ${user.is_blocked ? 'false' : 'true'})">${user.is_blocked ? 'Unblock' : 'Block'}</button>
+        </td>
+      </tr>
+    `).join('');
+    console.log('Admin users updated successfully');
+  } catch (error) {
+    console.error('Error loading admin users:', error);
+  }
+}
+
+function setAdminUserDetails(user) {
+  const details = document.getElementById('admin-user-details');
+  if (!details) return;
+
+  document.getElementById('detail-name').textContent = user.name || '—';
+  document.getElementById('detail-email').textContent = user.email || '—';
+  document.getElementById('detail-role').textContent = user.role || '—';
+  document.getElementById('detail-status').textContent = user.is_blocked ? 'Blocked' : 'Active';
+  document.getElementById('detail-joined').textContent = user.created_at ? new Date(user.created_at).toLocaleString() : '—';
+  document.getElementById('detail-last-active').textContent = user.last_active ? new Date(user.last_active).toLocaleString() : '—';
+  document.getElementById('detail-usage').textContent = `${user.ai_usage_count || 0} / ${user.ai_usage_limit || 0}`;
+  details.style.display = 'block';
+}
+
+async function viewAdminUser(userId) {
+  const res = await apiFetch(`/auth/admin-users/${userId}`);
+  if (!res.success) {
+    alert(res.message || 'Unable to fetch user details.');
+    return;
+  }
+  setAdminUserDetails(res.data);
+}
+
+async function removeAdminUser(userId) {
+  if (!confirm('Remove this user permanently?')) return;
+  const res = await apiFetch(`/auth/admin-users/${userId}`, 'DELETE');
+  if (!res.success) {
+    alert(res.message || 'Unable to remove user.');
+    return;
+  }
+  await loadAdminUsers();
+  const details = document.getElementById('admin-user-details');
+  if (details) details.style.display = 'none';
+}
+
+async function toggleBlockUser(userId, block) {
+  const res = await apiFetch(`/auth/admin-users/${userId}/block`, 'POST', { block });
+  if (!res.success) {
+    alert(res.message || 'Unable to update user status.');
+    return;
+  }
+  await loadAdminUsers();
+  if (document.getElementById('admin-user-details').style.display === 'block') {
+    viewAdminUser(userId);
+  }
+}
+
+loadAdminStats();
+loadAdminUsers();
+
+// Refresh button handler
+const refreshBtn = document.getElementById('refresh-stats-btn');
+if (refreshBtn) {
+  refreshBtn.onclick = async () => {
+    refreshBtn.disabled = true;
+    refreshBtn.textContent = 'Refreshing...';
+    await loadAdminStats();
+    await loadAdminUsers();
+    refreshBtn.disabled = false;
+    refreshBtn.textContent = 'Refresh Data';
+  };
+}
+
+// Auto-refresh stats every 30 seconds
+setInterval(() => {
+  console.log('Auto-refreshing admin stats...');
+  loadAdminStats();
+}, 30000);
+
+
+
+const sectionMeta = {
+  dashboard: {
+    title: 'Platform overview',
+    copy: 'Manage users, monitor content, and review system health for your AI Study Assistant.'
+  },
+  users: {
+    title: 'User management',
+    copy: 'View and moderate registered accounts from the user panel.'
+  },
+  content: {
+    title: 'Content moderation',
+    copy: 'Approve or inspect notes, tasks, and shared resources.'
+  },
+  analytics: {
+    title: 'Analytics dashboard',
+    copy: 'Track platform performance, engagement, and usage trends.'
+  },
+  settings: {
+    title: 'Settings & configuration',
+    copy: 'Manage system preferences, access controls, and content rules.'
+  }
+};
+
+function updateHero(sectionId) {
+  const heroTitle = document.getElementById('admin-hero-title');
+  const heroCopy = document.getElementById('admin-hero-copy');
+  const meta = sectionMeta[sectionId] || sectionMeta.dashboard;
+  if (heroTitle) heroTitle.textContent = meta.title;
+  if (heroCopy) heroCopy.textContent = meta.copy;
+}
+
+function setSection(sectionId) {
+  if (!sectionMeta[sectionId]) {
+    sectionId = 'dashboard';
+  }
+
+  const sections = document.querySelectorAll('.admin-panel-section');
+  const links = document.querySelectorAll('.sidebar-nav a');
+
+  sections.forEach(section => {
+    section.classList.toggle('active', section.id === `${sectionId}-section`);
+  });
+
+  links.forEach(link => {
+    link.classList.toggle('active', link.getAttribute('href') === `#${sectionId}`);
+  });
+
+  updateHero(sectionId);
+}
+
+function initAdminSections() {
+  const links = document.querySelectorAll('.sidebar-nav a');
+  links.forEach(link => {
+    const href = link.getAttribute('href');
+    if (href && href.startsWith('#')) {
+      link.addEventListener('click', (e) => {
+        e.preventDefault();
+        const sectionId = href.substring(1);
+        window.location.hash = sectionId;
+      });
+    }
+  });
+}
+
+window.addEventListener('hashchange', () => {
+  const sectionId = window.location.hash.substring(1) || 'dashboard';
+  setSection(sectionId);
+});
+
+initAdminSections();
+setSection(window.location.hash.substring(1) || 'dashboard');
+</script>
+</body>
+</html>
