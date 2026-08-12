@@ -52,6 +52,7 @@ project-va/
 │
 ├── .gitignore               # Git ignore rules
 ├── .env.example             # Environment template
+├── archive/                 # Archived temporary, draft, and TODO files
 ├── README.md                # Project documentation
 ├── STRUCTURE.md             # This file - project organization
 └── LICENSE                  # License file
