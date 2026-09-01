@@ -86,3 +86,42 @@ function initDarkMode() {
     };
   }
 }
+
+function initSidebar() {
+  const sidebar = document.getElementById('sidebar');
+  const overlay = document.getElementById('sidebar-overlay');
+  const toggle = document.getElementById('sidebar-toggle');
+  const close = document.getElementById('sidebar-close');
+  
+  if (!sidebar) return;
+
+  function closeSidebar() {
+    sidebar.classList.remove('active');
+    overlay.classList.remove('active');
+  }
+
+  function openSidebar() {
+    sidebar.classList.add('active');
+    overlay.classList.add('active');
+  }
+
+  if (toggle) toggle.onclick = openSidebar;
+  if (close) close.onclick = closeSidebar;
+  if (overlay) overlay.onclick = closeSidebar;
+
+  // Close sidebar when navigating
+  const navLinks = sidebar.querySelectorAll('.sidebar-nav a');
+  navLinks.forEach(link => {
+    link.onclick = closeSidebar;
+  });
+
+  // Set active link based on current page
+  const currentPage = window.location.pathname.split('/').pop() || 'dashboard.html';
+  navLinks.forEach(link => {
+    link.classList.remove('active');
+    if (link.getAttribute('href') === currentPage) {
+      link.classList.add('active');
+    }
+  });
+}
+

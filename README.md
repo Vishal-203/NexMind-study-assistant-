@@ -42,28 +42,59 @@ The app runs as a local Flask website and the browser pages use JWT tokens to ac
 
 ### 1. Clone and Setup
 
+Replace `<repo-url>` with the repository HTTPS URL (example shown).
+
 ```bash
-git clone <repo-url>
-cd project-va
+# Clone the repository
+git clone https://github.com/Vishal-203/NexMind-study-assistant-.git
+cd NexMind-study-assistant-
+
+# Create a Python virtual environment (cross-platform)
 python -m venv venv
 ```
 
-### 2. Windows - Activate Virtual Environment
+### 2. Activate Virtual Environment
+
+On macOS / Linux (bash, zsh):
+
+```bash
+source venv/bin/activate
+python -m pip install -r backend/requirements.txt
+```
+
+On Windows PowerShell:
 
 ```powershell
-.\venv\Scripts\python.exe -m pip install -r backend/requirements.txt
+venv\Scripts\Activate.ps1
+python -m pip install -r backend/requirements.txt
+```
+
+On Windows cmd.exe:
+
+```cmd
+venv\Scripts\activate.bat
+python -m pip install -r backend/requirements.txt
+```
+
+> If your system Python points to python3, prefix commands with `python3`.
+
+If the frontend has Node dependencies (check `frontend/`), install them from the repo root:
+
+```bash
+# from repo root
+# if there is a package.json inside frontend/
+cd frontend && npm install && cd ..
 ```
 
 ### 3. Configuration
 
-Create a `.env` file in the project root:
+Create a `.env` file in the project root by copying the included example:
 
-```env
-SECRET_KEY=your-secret-key-here
-JWT_SECRET_KEY=your-jwt-secret-key
-MONGO_URI=mongodb://localhost:27017/ai_study_assistant
-OPENAI_API_KEY=sk-your-openai-key-here
+```bash
+cp .env.example .env
 ```
+
+Open `.env` and set the required values (do NOT commit secrets to Git).
 
 ### 4. Database Setup
 
@@ -76,16 +107,23 @@ mongod
 
 ### 5. Start the Server
 
-```powershell
-.\venv\Scripts\python.exe backend/app.py
+With the virtual environment active, you can start the backend:
+
+```bash
+# From repository root
+python backend/app.py
+# or (if you prefer Flask cli)
+# export FLASK_APP=backend.app (macOS/Linux)
+# set FLASK_APP=backend.app (Windows)
+# flask run
 ```
 
-The server will run on `http://localhost:5000`
+The server will run on `http://localhost:5000` by default.
 
 ## Project Structure
 
 ```
-project-va/
+NexMind-study-assistant-/
 ├── backend/
 │   ├── app.py                 # Main Flask app
 │   ├── requirements.txt        # Python dependencies
@@ -117,7 +155,8 @@ project-va/
 │   ├── ai_assistant.html     # AI features
 │   ├── app.js               # API utilities & helpers
 │   └── styles.css           # Global styling
-├── .env                      # Environment variables
+├── .env                      # Environment variables (DO NOT COMMIT)
+├── .env.example              # Example environment variables (this file)
 ├── .gitignore               # Git ignore rules
 └── README.md                # This file
 ```
@@ -206,7 +245,7 @@ project-va/
 
 ### "ModuleNotFoundError: No module named 'flask'"
 ```powershell
-.\venv\Scripts\python.exe -m pip install -r backend/requirements.txt
+python -m pip install -r backend/requirements.txt
 ```
 
 ### "MongoDB connection refused"

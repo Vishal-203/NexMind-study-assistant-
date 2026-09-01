@@ -6,85 +6,121 @@
 <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-<div class="navbar"><div>AI Study Assistant</div><div><a href="dashboard.html">Dashboard</a><a href="profile.html">Profile</a><a href="notebook.html">Notebook</a><a href="planner.html">Planner</a><a href="#" id="logout">Logout</a></div></div>
-<div class="container">
-<section class="page-hero">
-  <p class="hero-kicker">AI Workspace</p>
-  <h1>Study with context, not blank prompts.</h1>
-  <p class="hero-subtitle">Attach your notes or uploaded files, then ask questions, generate summaries, or create quizzes from material you already saved.</p>
-</section>
+<div class="app-container">
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <div class="pulse-node" style="width: 12px; height: 12px; background: var(--primary); border-radius: 50%;"></div>
+      <span>Neural Flow</span>
+    </div>
+    <nav class="nav-links">
+      <a href="dashboard.html"><span>📊</span> Dashboard</a>
+      <a href="notebook.html"><span>📓</span> Notes</a>
+      <a href="ai_assistant.html" class="active"><span>🧠</span> AI Assistant</a>
+      <a href="planner.html"><span>✅</span> Tasks</a>
+      <a href="profile.html"><span>👤</span> Profile</a>
+      <a href="#" id="logout-sidebar"><span>🚪</span> Logout</a>
+    </nav>
+  </aside>
 
-<div class="grid-2">
-  <div class="card">
-    <h3>Use Uploaded File</h3>
-    <p class="section-intro">Pick a file from Notebook to give the AI extra study context.</p>
-    <select id="file-select" class="input-field">
-      <option value="">-- No file selected --</option>
-    </select>
-    <button class="btn" id="refresh-files">Refresh Files</button>
-    <p id="file-status" style="font-size:0.9rem; margin-top:0.5rem; color:var(--text-faint);"></p>
-  </div>
+  <main class="main-content">
+    <section class="page-hero">
+      <p class="auth-kicker">Neural Intelligence</p>
+      <h1>AI Workspace</h1>
+      <p class="section-intro">Connect your knowledge nodes and external resources to the core AI engine for deep synthesis.</p>
+    </section>
 
-  <div class="card">
-    <h3>Use Saved Note</h3>
-    <p class="section-intro">Select a notebook entry to reuse its subject, topic, tags, and content as context.</p>
-    <select id="note-select" class="input-field">
-      <option value="">-- No note selected --</option>
-    </select>
-    <button class="btn" id="refresh-notes">Refresh Notes</button>
-    <p id="note-status" style="font-size:0.9rem; margin-top:0.5rem; color:var(--text-faint);"></p>
-  </div>
+    <div class="grid-2">
+      <div class="card">
+        <h3>Resource Injection</h3>
+        <p class="section-intro">Select an external data file as context.</p>
+        <select id="file-select" class="input-field">
+          <option value="">-- No file selected --</option>
+        </select>
+        <button class="btn" id="refresh-files" style="width: 100%;">Refresh Data</button>
+        <p id="file-status" style="font-size:0.8rem; margin-top:0.5rem; color:var(--text-muted);"></p>
+      </div>
+
+      <div class="card">
+        <h3>Node Connection</h3>
+        <p class="section-intro">Select a knowledge node for local context.</p>
+        <select id="note-select" class="input-field">
+          <option value="">-- No note selected --</option>
+        </select>
+        <button class="btn" id="refresh-notes" style="width: 100%;">Refresh Nodes</button>
+        <p id="note-status" style="font-size:0.8rem; margin-top:0.5rem; color:var(--text-muted);"></p>
+      </div>
+    </div>
+
+    <div class="card highlight-card">
+      <h3>Query Engine</h3>
+      <p class="section-intro">Ask questions about your study material. Context will be automatically synthesized.</p>
+      <textarea id="question" class="input-field" rows="3" placeholder="Analyze knowledge nodes..."></textarea>
+      <button class="btn" id="ask-btn">Execute Query</button>
+      <div id="answer" class="result-panel" style="display: none;"></div>
+    </div>
+
+    <div class="grid-2">
+      <div class="card">
+        <h3>Synthesis Engine</h3>
+        <p class="section-intro">Summarize raw data or connected nodes.</p>
+        <textarea id="summary-text" class="input-field" rows="3" placeholder="Paste raw data for synthesis..."></textarea>
+        <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+          <button class="btn" id="summarize-btn">Summarize Text</button>
+          <button class="btn btn-secondary" id="summarize-file-btn">Summarize File</button>
+          <button class="btn btn-secondary" id="summarize-note-btn">Summarize Node</button>
+        </div>
+        <div id="summary" class="result-panel" style="display: none;"></div>
+      </div>
+
+      <div class="card">
+        <h3>Evaluation Generator</h3>
+        <p class="section-intro">Generate active recall metrics for any topic.</p>
+        <input id="quiz-topic" class="input-field" placeholder="Enter topic for evaluation" />
+        <button class="btn" id="quiz-btn" style="width: 100%;">Generate Evaluation</button>
+        <pre id="quiz" style="background: rgba(0,0,0,0.3); padding: 1rem; border-radius: 8px; margin-top: 1rem; font-family: monospace; white-space: pre-wrap; display: none;"></pre>
+      </div>
+    </div>
+  </main>
 </div>
 
-<div class="card">
-  <h3>Ask Question</h3>
-  <p class="section-intro">Ask a question about your study material. Selected note and file context will be included if available.</p>
-  <textarea id="question" class="input-field" rows="3" placeholder="Ask a question about your topic..."></textarea>
-  <button class="btn" id="ask-btn">Get Answer</button>
-  <p id="answer" class="result-panel"></p>
-</div>
-
-<div class="card">
-  <h3>Summarize Notes</h3>
-  <p class="section-intro">Summarize pasted notes or generate a summary from the file or note you selected above.</p>
-  <textarea id="summary-text" class="input-field" rows="3" placeholder="Paste your notes..."></textarea>
-  <button class="btn" id="summarize-btn">Summarize</button>
-  <button class="btn btn-secondary" id="summarize-file-btn">Summarize Selected File</button>
-  <button class="btn btn-secondary" id="summarize-note-btn">Summarize Selected Note</button>
-  <p id="summary" class="result-panel"></p>
-</div>
-
-<div class="card">
-  <h3>Generate Quiz</h3>
-  <p class="section-intro">Turn a topic into quick revision questions and answers.</p>
-  <input id="quiz-topic" class="input-field" placeholder="Enter topic" />
-  <button class="btn" id="quiz-btn">Generate Quiz</button>
-  <pre id="quiz"></pre>
-</div>
-</div>
 <script src="app.js"></script>
+<script src="neural-bg.js"></script>
 <script>
 requireAuth();
 initDarkMode();
-document.getElementById('logout').onclick = () => {clearToken(); localStorage.removeItem('user'); window.location='index.html';};
+
+document.getElementById('logout-sidebar').onclick = (e) => {
+  e.preventDefault();
+  clearToken();
+  localStorage.removeItem('user');
+  window.location = 'index.html';
+};
 
 async function display(eid, endpoint, payload, btn){
+  const out = document.getElementById(eid);
   if (btn) {
     btn.disabled = true;
-    btn.textContent = 'Loading...';
+    btn.dataset.originalText = btn.textContent;
+    btn.textContent = 'Processing...';
   }
-  const out = document.getElementById(eid);
+  out.style.display = 'none';
   out.textContent = '';
+  
   const res = await apiFetch(endpoint, 'POST', payload);
   if (btn) {
     btn.disabled = false;
-    btn.textContent = endpoint === '/ai/chat' ? 'Get Answer' : endpoint === '/ai/summarize' ? 'Summarize' : 'Generate Quiz';
+    btn.textContent = btn.dataset.originalText;
   }
-  if(!res.success){ out.innerHTML = `<span style="color:var(--danger)">${res.message}</span>`; return; }
+  
+  if(!res.success){ 
+    out.innerHTML = `<span style="color:var(--badge-danger)">${res.message}</span>`; 
+    out.style.display = 'block';
+    return; 
+  }
+  
   const data = res.data.answer || res.data.summary || res.data.quiz;
-  out.style.whiteSpace = 'pre-wrap';
-  out.style.marginTop = '0.75rem';
   out.textContent = data;
+  out.style.display = 'block';
 }
 
 async function loadFileOptions() {
@@ -93,7 +129,7 @@ async function loadFileOptions() {
   const res = await apiFetch('/files');
   select.innerHTML = '<option value="">-- No file selected --</option>';
   if (!res.success || !Array.isArray(res.data) || res.data.length === 0) {
-    status.textContent = 'No uploaded files found. Upload files from Notebook.';
+    status.textContent = 'No resources found.';
     return;
   }
   res.data.forEach(file => {
@@ -102,7 +138,7 @@ async function loadFileOptions() {
     option.textContent = `${file.filename} (${(file.size/1024).toFixed(1)} KB)`;
     select.appendChild(option);
   });
-  status.textContent = `${res.data.length} uploaded file(s) available.`;
+  status.textContent = `${res.data.length} resource(s) active.`;
 }
 
 async function loadNoteOptions() {
@@ -112,32 +148,24 @@ async function loadNoteOptions() {
   select.innerHTML = '<option value="">-- No note selected --</option>';
   const items = Array.isArray(res?.data?.items) ? res.data.items : [];
   if (!res.success || items.length === 0) {
-    status.textContent = 'No notes found. Create notes from Notebook.';
+    status.textContent = 'No nodes connected.';
     return;
   }
   items.forEach(note => {
     const option = document.createElement('option');
     option.value = note.id;
-    option.textContent = `${note.subject || 'Untitled'} - ${note.topic || 'No topic'}`;
+    option.textContent = `${note.subject} - ${note.topic}`;
     select.appendChild(option);
   });
-  status.textContent = `${items.length} note(s) available.`;
-}
-
-function getSelectedFileId() {
-  return document.getElementById('file-select').value || null;
-}
-
-function getSelectedNoteId() {
-  return document.getElementById('note-select').value || null;
+  status.textContent = `${items.length} node(s) connected.`;
 }
 
 document.getElementById('ask-btn').onclick = async function() {
-  const question = document.getElementById('question').value.trim();
-  if(!question){ alert('Please ask a question'); return; }
-  const fileId = getSelectedFileId();
-  const noteId = getSelectedNoteId();
-  const payload = { message: question };
+  const q = document.getElementById('question').value.trim();
+  if(!q) return;
+  const fileId = document.getElementById('file-select').value || null;
+  const noteId = document.getElementById('note-select').value || null;
+  const payload = { message: q };
   if (fileId) payload.file_id = fileId;
   if (noteId) payload.note_id = noteId;
   display('answer','/ai/chat', payload, this);
@@ -145,25 +173,25 @@ document.getElementById('ask-btn').onclick = async function() {
 
 document.getElementById('summarize-btn').onclick = async function() {
   const text = document.getElementById('summary-text').value.trim();
-  if(!text){ alert('Please enter text to summarize or select a file to summarize'); return; }
+  if(!text) return;
   display('summary','/ai/summarize',{text}, this);
 };
 
 document.getElementById('summarize-file-btn').onclick = async function() {
-  const fileId = getSelectedFileId();
-  if(!fileId){ alert('Please select a file to summarize'); return; }
-  display('summary','/ai/summarize',{file_id: fileId}, this);
+  const fid = document.getElementById('file-select').value;
+  if(!fid) return;
+  display('summary','/ai/summarize',{file_id: fid}, this);
 };
 
 document.getElementById('summarize-note-btn').onclick = async function() {
-  const noteId = getSelectedNoteId();
-  if(!noteId){ alert('Please select a note to summarize'); return; }
-  display('summary','/ai/summarize',{note_id: noteId}, this);
+  const nid = document.getElementById('note-select').value;
+  if(!nid) return;
+  display('summary','/ai/summarize',{note_id: nid}, this);
 };
 
 document.getElementById('quiz-btn').onclick = async function() {
   const topic = document.getElementById('quiz-topic').value.trim();
-  if(!topic){ alert('Please enter a topic'); return; }
+  if(!topic) return;
   display('quiz','/ai/quiz',{topic}, this);
 };
 
